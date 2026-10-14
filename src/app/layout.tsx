@@ -12,6 +12,9 @@ const SITE = 'https://frontdeskkc.com'
 const TITLE = 'FrontDesk AI — AI Receptionist for Kansas City Service Businesses'
 const DESCRIPTION =
   'FrontDesk AI answers every call, books appointments, texts clients, and tracks every lead. Built and supported locally in Kansas City by FrontDesk KC.'
+const OG_IMAGE = 'https://frontdeskkc.com/og/home.png'
+const OG_ALT =
+  'FrontDesk AI: your front desk, working 24/7 for Kansas City service businesses.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -26,10 +29,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: '/',
+    url: SITE,
     siteName: 'FrontDesk KC',
     title: TITLE,
     description: DESCRIPTION,
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: OG_ALT,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
 }
 
