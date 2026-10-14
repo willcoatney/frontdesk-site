@@ -1,0 +1,10 @@
+# FrontDesk KC only. This Netlify site is separate from the concrete site.
+# Base is the path from the repository root. Publish is relative to that base,
+# so the deploy folder is frontdesk-site/out.
+[build]
+  base = "frontdesk-site"
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "20"
