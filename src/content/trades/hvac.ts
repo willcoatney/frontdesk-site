@@ -18,7 +18,7 @@ const trade: TradeConfig = {
   },
   hero: {
     kicker: 'For Kansas City heating and air',
-    title: 'The phone gets answered while you are on the roof.',
+    title: 'The phone gets answered while you are in the attic.',
     lede: 'An attic in July, or a furnace on the first cold week. You cannot pick up, and a house without air or heat calls the next company. Will builds the front office from Olathe, for 913 and 816 numbers. Starter takes the message and texts you the lead. Pro can quote a diagnostic or a maintenance visit inside your bands. A system replacement is booked as a look.',
   },
   heroAside: {
