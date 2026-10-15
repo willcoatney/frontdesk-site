@@ -163,6 +163,8 @@ test('csv import merges emails by business name and stays idempotent', async () 
   assert.equal(plumbing.source, RESEARCH_SOURCE)
   assert.equal(plumbing.email, 'owner@example.test')
   assert.equal(plumbing.city, 'Olathe, KS')
+  assert.equal(plumbing.score_1to5, '5')
+  assert.equal(first.prospects.find((prospect) => prospect.businessName === 'Northwind Electric').score_1to5, '')
   assert.match(plumbing.notes, /No booking, no chat/)
   assert.match(plumbing.notes, /Alternate email: other@example.test/)
   assert.equal(first.prospects.find((prospect) => prospect.businessName === 'Missing Name Co').email, 'missing@example.test')
@@ -174,7 +176,40 @@ test('csv import merges emails by business name and stays idempotent', async () 
 
   const moved = updateProspectRecord(again.prospects, plumbing.id, { stage: 'demo booked' }, new Date('2026-10-16T13:00:00Z'))
   const third = importRecords(moved.prospects, { prospectsCsv, emailsCsv })
-  assert.equal(third.prospects.find((prospect) => prospect.id === plumbing.id).stage, 'demo booked')
+  const kept = third.prospects.find((prospect) => prospect.id === plumbing.id)
+  assert.equal(kept.stage, 'demo booked')
+  assert.equal(kept.score_1to5, '5')
+})
+
+test('stored score_1to5 is returned and kept when the stage changes', async () => {
+  const store = memoryStore()
+  const token = await login(store)
+  const imported = await handleRequest(
+    authed('/api/admin/import', {
+      method: 'POST',
+      token,
+      body: {
+        prospectsCsv:
+          'business_name,trade,score_1to5\nSample Plumbing,Plumbing,4\nBlank Score,Electrical,9\n',
+      },
+    }),
+    { env, store },
+  )
+  assert.equal(imported.status, 200)
+  const body = await imported.json()
+  const sample = body.prospects.find((prospect) => prospect.businessName === 'Sample Plumbing')
+  const blank = body.prospects.find((prospect) => prospect.businessName === 'Blank Score')
+  assert.equal(sample.score_1to5, '4')
+  assert.equal(blank.score_1to5, '')
+
+  const patched = await handleRequest(
+    authed(`/api/admin/prospects/${sample.id}`, { method: 'PATCH', token, body: { stage: 'won' } }),
+    { env, store },
+  )
+  assert.equal(patched.status, 200)
+  const saved = await patched.json()
+  assert.equal(saved.prospect.stage, 'won')
+  assert.equal(saved.prospect.score_1to5, '4')
 })
 
 test('quoted csv cells survive commas and newlines', () => {

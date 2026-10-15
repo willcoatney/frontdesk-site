@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type HTMLAttributes } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type HTMLAttributes, type KeyboardEvent } from 'react'
 
 const STAGES = ['new', 'contacted', 'replied', 'demo booked', 'won', 'lost'] as const
 
@@ -18,6 +18,7 @@ type Prospect = {
   phone: string
   email: string
   website: string
+  score_1to5?: string
   createdAt: string
   updatedAt: string
 }
@@ -49,7 +50,7 @@ const emptyDraft = (): Draft => ({
 })
 
 const tap =
-  'inline-flex min-h-12 w-full items-center justify-center rounded-xl px-3 py-2 text-center text-base font-semibold leading-tight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] disabled:opacity-60'
+  'inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-xl px-3 py-2 text-center text-base font-semibold leading-tight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] disabled:opacity-60'
 const inputClass =
   'min-h-12 w-full min-w-0 max-w-full rounded-xl border border-[#DDD5C8] bg-white px-3 text-base text-[#1C1915] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]'
 
@@ -57,6 +58,10 @@ function stageLabel(stage: string) {
   if (stage === 'new') return 'New'
   if (stage === 'demo booked') return 'Demo booked'
   return stage.charAt(0).toUpperCase() + stage.slice(1)
+}
+
+function stageDomId(stage: string) {
+  return stage.replace(/\s+/g, '-')
 }
 
 function todayLocal() {
@@ -100,6 +105,21 @@ function websiteHref(website: string) {
   return ''
 }
 
+function storedScore(prospect: Pick<Prospect, 'notes' | 'score_1to5'>) {
+  const direct = String(prospect.score_1to5 ?? '').trim()
+  if (/^[1-5]$/.test(direct)) return direct
+  const matches = [...prospect.notes.matchAll(/(?:^|\n)Score:\s*([1-5])\b/g)]
+  return matches.length ? matches[matches.length - 1][1] : ''
+}
+
+function lastNote(notes: string) {
+  const parts = notes
+    .split(/\n\s*\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+  return parts.at(-1) ?? ''
+}
+
 function compareProspects(a: Prospect, b: Prospect) {
   const today = todayLocal()
   const rank = (prospect: Prospect) => {
@@ -116,6 +136,23 @@ function compareProspects(a: Prospect, b: Prospect) {
   return a.businessName.localeCompare(b.businessName)
 }
 
+function useBoardLayout() {
+  const [layout, setLayout] = useState({ wide: false, drag: false })
+  useEffect(() => {
+    const wide = window.matchMedia('(min-width: 1280px)')
+    const drag = window.matchMedia('(min-width: 1280px) and (pointer: fine)')
+    const update = () => setLayout({ wide: wide.matches, drag: drag.matches })
+    update()
+    wide.addEventListener('change', update)
+    drag.addEventListener('change', update)
+    return () => {
+      wide.removeEventListener('change', update)
+      drag.removeEventListener('change', update)
+    }
+  }, [])
+  return layout
+}
+
 async function readError(response: Response) {
   const data = (await response.json().catch(() => ({}))) as { error?: string }
   return data.error || 'Request failed'
@@ -127,11 +164,18 @@ export function Pipeline() {
   const [prospects, setProspects] = useState<Prospect[]>([])
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [moveStatus, setMoveStatus] = useState('')
   const [query, setQuery] = useState('')
   const [stageFilter, setStageFilter] = useState('')
+  const [activeStage, setActiveStage] = useState<Stage>('new')
   const [showAdd, setShowAdd] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [overStage, setOverStage] = useState<Stage | null>(null)
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const dragIdRef = useRef<string | null>(null)
+  const { wide, drag: canDrag } = useBoardLayout()
 
   const loadProspects = useCallback(async () => {
     const response = await fetch('/api/admin/prospects', { credentials: 'same-origin' })
@@ -166,6 +210,15 @@ export function Pipeline() {
       cancel = true
     }
   }, [loadProspects])
+
+  useEffect(() => {
+    const root = tabsRef.current
+    if (!root) return
+    const tab = root.querySelector<HTMLElement>(`[data-stage="${activeStage}"]`)
+    if (!tab) return
+    const left = tab.offsetLeft - (root.clientWidth - tab.offsetWidth) / 2
+    root.scrollTo({ left: Math.max(0, left) })
+  }, [activeStage])
 
   async function onLogin(event: FormEvent) {
     event.preventDefault()
@@ -208,11 +261,37 @@ export function Pipeline() {
       .sort(compareProspects)
   }, [prospects, query, stageFilter])
 
+  const byStage = useMemo(() => {
+    const grouped = Object.fromEntries(STAGES.map((stage) => [stage, [] as Prospect[]])) as Record<Stage, Prospect[]>
+    for (const prospect of visible) grouped[prospect.stage].push(prospect)
+    return grouped
+  }, [visible])
+
+  function onStageFilter(value: string) {
+    setStageFilter(value)
+    if (STAGES.includes(value as Stage)) setActiveStage(value as Stage)
+  }
+
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, stage: Stage) {
+    const index = STAGES.indexOf(stage)
+    let nextIndex = -1
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (index + 1) % STAGES.length
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index - 1 + STAGES.length) % STAGES.length
+    if (event.key === 'Home') nextIndex = 0
+    if (event.key === 'End') nextIndex = STAGES.length - 1
+    if (nextIndex < 0) return
+    event.preventDefault()
+    const next = STAGES[nextIndex]
+    setActiveStage(next)
+    requestAnimationFrame(() => document.getElementById(`pipeline-tab-${stageDomId(next)}`)?.focus())
+  }
+
   async function saveStage(prospect: Prospect, stage: Stage) {
     if (prospect.stage === stage) return
     const previous = prospects
     setProspects((list) => list.map((item) => (item.id === prospect.id ? { ...item, stage } : item)))
     setError('')
+    setMoveStatus('')
     try {
       const response = await fetch(`/api/admin/prospects/${prospect.id}`, {
         method: 'PATCH',
@@ -221,12 +300,14 @@ export function Pipeline() {
         body: JSON.stringify({ stage }),
       })
       if (response.status === 401) {
+        setProspects(previous)
         setStatus('login')
         return
       }
       if (!response.ok) throw new Error(await readError(response))
       const data = (await response.json()) as { prospect: Prospect }
       setProspects((list) => list.map((item) => (item.id === prospect.id ? data.prospect : item)))
+      setMoveStatus(`${prospect.businessName} moved to ${stageLabel(stage)}.`)
     } catch (cause) {
       setProspects(previous)
       setError(cause instanceof Error ? cause.message : 'Could not update stage')
@@ -246,6 +327,7 @@ export function Pipeline() {
         body: JSON.stringify({ nextFollowUp }),
       })
       if (response.status === 401) {
+        setProspects(previous)
         setStatus('login')
         return
       }
@@ -342,29 +424,146 @@ export function Pipeline() {
     }
   }
 
+  function onCardDragStart(event: DragEvent<HTMLElement>, prospect: Prospect) {
+    const target = event.target
+    if (target instanceof Element && target.closest('a, button, input, select, textarea, label')) {
+      event.preventDefault()
+      return
+    }
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', prospect.id)
+    dragIdRef.current = prospect.id
+    setDragId(prospect.id)
+  }
+
+  function onCardDragEnd() {
+    dragIdRef.current = null
+    setDragId(null)
+    setOverStage(null)
+  }
+
+  function onColumnDragOver(event: DragEvent<HTMLElement>, stage: Stage) {
+    if (!dragIdRef.current) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+    setOverStage((current) => (current === stage ? current : stage))
+  }
+
+  function onColumnDrop(event: DragEvent<HTMLElement>, stage: Stage) {
+    event.preventDefault()
+    const id = event.dataTransfer.getData('text/plain') || dragIdRef.current
+    dragIdRef.current = null
+    setDragId(null)
+    setOverStage(null)
+    const prospect = prospects.find((item) => item.id === id)
+    if (prospect) void saveStage(prospect, stage)
+  }
+
+  function renderColumn(stage: Stage, desktop: boolean) {
+    const items = byStage[stage]
+    const dropping = desktop && overStage === stage && Boolean(dragId)
+    const empty = stageFilter && stageFilter !== stage ? 'Hidden by the stage filter' : query.trim() ? 'No matches' : 'Empty'
+    return (
+      <section
+        key={stage}
+        aria-labelledby={desktop ? `pipeline-column-${stageDomId(stage)}` : `pipeline-tab-${stageDomId(stage)}`}
+        className={`flex min-h-48 min-w-0 flex-col rounded-2xl border p-2 ${desktop ? 'h-full min-h-0 overflow-hidden' : ''} ${dropping ? 'border-[#1B4332] bg-[#E7F0EA]' : 'border-[#E4DDD2] bg-[#EFEBE3]'}`}
+        onDragOver={desktop && canDrag ? (event) => onColumnDragOver(event, stage) : undefined}
+        onDrop={desktop && canDrag ? (event) => onColumnDrop(event, stage) : undefined}
+      >
+        {desktop ? (
+          <header className="mb-2 flex shrink-0 items-center justify-between gap-2 px-1">
+            <h2 id={`pipeline-column-${stageDomId(stage)}`} className="text-sm font-semibold">
+              {stageLabel(stage)}
+            </h2>
+            <span className="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-0.5 text-sm font-semibold tabular-nums text-[#1C1915] ring-1 ring-[#DDD5C8]">
+              {items.length}
+            </span>
+          </header>
+        ) : null}
+        <div className={`flex flex-col gap-2 ${desktop ? 'min-h-0 flex-1 overflow-y-auto' : ''}`}>
+          {items.length === 0 ? (
+            <p className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#DDD5C8] px-3 py-8 text-center text-sm text-[#5C564E]">
+              {dropping ? 'Drop here' : empty}
+            </p>
+          ) : (
+            items.map((prospect) => (
+              <ProspectCard
+                key={prospect.id}
+                prospect={prospect}
+                busy={busy}
+                canDrag={desktop && canDrag}
+                dragging={dragId === prospect.id}
+                onStage={(next) => saveStage(prospect, next)}
+                onFollowUp={(date) => saveFollowUp(prospect, date)}
+                onSave={(draft) => saveProspect(prospect.id, draft)}
+                onDelete={() => removeProspect(prospect.id)}
+                onDragStart={(event) => onCardDragStart(event, prospect)}
+                onDragEnd={onCardDragEnd}
+              />
+            ))
+          )}
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#F3EFE7] text-[#1C1915]">
-      <div className="mx-auto w-full max-w-6xl px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6">
+    <div className="min-h-screen max-w-[100vw] overflow-x-clip bg-[#F3EFE7] text-[#1C1915]">
+      <div className="mx-auto w-full min-w-0 max-w-[1600px] px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6">
         {status === 'loading' ? <p className="py-16 text-center text-base text-[#5C564E]">Checking access…</p> : null}
         {status === 'login' ? (
           <LoginForm busy={busy} error={error} password={password} setPassword={setPassword} onSubmit={onLogin} />
         ) : null}
         {status === 'ready' ? (
           <>
-            <header className="sticky top-0 z-20 -mx-4 mb-4 flex items-center justify-between gap-3 border-b border-[#DDD5C8] bg-[#F3EFE7]/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold tracking-wide text-[#5C564E]">FrontDesk KC</p>
-                <h1 className="truncate text-2xl font-semibold leading-tight">Pipeline</h1>
+            <header className="sticky top-0 z-20 -mx-4 mb-4 border-b border-[#DDD5C8] bg-[#F3EFE7]/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold tracking-wide text-[#5C564E]">FrontDesk KC</p>
+                  <h1 className="truncate text-2xl font-semibold leading-tight">Pipeline</h1>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex min-h-12 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-white px-4 text-base font-semibold text-[#1C1915] ring-1 ring-[#DDD5C8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
+                  onClick={onLogout}
+                >
+                  Log out
+                </button>
               </div>
-              <button
-                type="button"
-                className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-white px-4 text-base font-semibold text-[#1C1915] ring-1 ring-[#DDD5C8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
-                onClick={onLogout}
+              <div
+                ref={tabsRef}
+                role="tablist"
+                aria-label="Pipeline stages"
+                className="mt-3 flex max-w-full snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain pb-1 xl:hidden"
               >
-                Log out
-              </button>
+                {STAGES.map((stage) => {
+                  const selected = activeStage === stage
+                  return (
+                    <button
+                      key={stage}
+                      id={`pipeline-tab-${stageDomId(stage)}`}
+                      type="button"
+                      role="tab"
+                      data-stage={stage}
+                      aria-selected={selected}
+                      aria-controls={`pipeline-panel-${stageDomId(stage)}`}
+                      tabIndex={selected ? 0 : -1}
+                      className={`inline-flex min-h-12 shrink-0 snap-start cursor-pointer items-center gap-2 rounded-xl px-3 text-base font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${selected ? 'bg-[#1B4332] text-[#F6F3EC]' : 'bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]'}`}
+                      onClick={() => setActiveStage(stage)}
+                      onKeyDown={(event) => onTabKeyDown(event, stage)}
+                    >
+                      <span>{stageLabel(stage)}</span>
+                      <span className={`tabular-nums ${selected ? 'text-[#F6F3EC]' : 'text-[#5C564E]'}`}>{byStage[stage].length}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </header>
 
+            <p className="sr-only" role="status">
+              {moveStatus}
+            </p>
             {error ? (
               <p role="alert" className="mb-3 rounded-xl border border-[#E4C7BC] bg-[#F8EBE6] px-3 py-3 text-base text-[#6F2E24]">
                 {error}
@@ -376,14 +575,14 @@ export function Pipeline() {
               </p>
             ) : null}
 
-            <div className="mb-3 grid gap-3 sm:grid-cols-2">
-              <label className="block">
+            <div className="mb-3 grid min-w-0 gap-3 sm:grid-cols-2">
+              <label className="block min-w-0">
                 <span className="mb-1 block text-sm font-semibold text-[#5C564E]">Search</span>
                 <input className={inputClass} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, phone, city" autoComplete="off" />
               </label>
-              <label className="block">
+              <label className="block min-w-0">
                 <span className="mb-1 block text-sm font-semibold text-[#5C564E]">Stage</span>
-                <select className={inputClass} value={stageFilter} onChange={(event) => setStageFilter(event.target.value)} aria-label="Filter by stage">
+                <select className={inputClass} value={stageFilter} onChange={(event) => onStageFilter(event.target.value)} aria-label="Filter by stage">
                   <option value="">All stages</option>
                   {STAGES.map((stage) => (
                     <option key={stage} value={stage}>
@@ -408,29 +607,32 @@ export function Pipeline() {
 
             <p className="mb-3 text-sm font-medium text-[#5C564E]">
               {visible.length === prospects.length ? `${prospects.length} prospects` : `${visible.length} of ${prospects.length} prospects`}
+              <span className="hidden xl:inline">. Drag a card between columns, or use Move to.</span>
             </p>
 
-            {visible.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-[#DDD5C8] bg-[#FBF8F3] px-4 py-8 text-center text-base text-[#5C564E]">
-                {prospects.length === 0 ? 'No prospects yet. Import a CSV or add one.' : 'Nothing matches that search.'}
+            {prospects.length === 0 ? (
+              <p className="mb-3 rounded-2xl border border-dashed border-[#DDD5C8] bg-[#FBF8F3] px-4 py-6 text-center text-base text-[#5C564E]">
+                No prospects yet. Import a CSV or add one.
               </p>
+            ) : null}
+            {prospects.length > 0 && visible.length === 0 ? (
+              <p className="mb-3 rounded-2xl border border-dashed border-[#DDD5C8] bg-[#FBF8F3] px-4 py-6 text-center text-base text-[#5C564E]">
+                Nothing matches that search.
+              </p>
+            ) : null}
+
+            {wide ? (
+              <div className="grid h-[min(52rem,calc(100vh-11rem))] min-w-0 grid-cols-6 items-stretch gap-3">
+                {STAGES.map((stage) => (
+                  <div key={stage} className="flex min-h-0 min-w-0 flex-col">
+                    {renderColumn(stage, true)}
+                  </div>
+                ))}
+              </div>
             ) : (
-              <>
-                <div className="grid gap-3 xl:hidden">
-                  {visible.map((prospect) => (
-                    <ProspectCard
-                      key={prospect.id}
-                      prospect={prospect}
-                      busy={busy}
-                      onStage={(stage) => saveStage(prospect, stage)}
-                      onFollowUp={(date) => saveFollowUp(prospect, date)}
-                      onSave={(draft) => saveProspect(prospect.id, draft)}
-                      onDelete={() => removeProspect(prospect.id)}
-                    />
-                  ))}
-                </div>
-                <ProspectTable prospects={visible} busy={busy} onStage={saveStage} onSave={saveProspect} onDelete={removeProspect} />
-              </>
+              <div id={`pipeline-panel-${stageDomId(activeStage)}`} role="tabpanel" aria-labelledby={`pipeline-tab-${stageDomId(activeStage)}`} className="min-w-0">
+                {renderColumn(activeStage, false)}
+              </div>
             )}
           </>
         ) : null}
@@ -486,106 +688,133 @@ function LoginForm({
 function ProspectCard({
   prospect,
   busy,
+  canDrag,
+  dragging,
   onStage,
   onFollowUp,
   onSave,
   onDelete,
+  onDragStart,
+  onDragEnd,
 }: {
   prospect: Prospect
   busy: boolean
+  canDrag: boolean
+  dragging: boolean
   onStage: (stage: Stage) => void
   onFollowUp: (date: string) => void
   onSave: (draft: Draft) => Promise<boolean>
   onDelete: () => void
+  onDragStart: (event: DragEvent<HTMLElement>) => void
+  onDragEnd: () => void
 }) {
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
-  const [notesOpen, setNotesOpen] = useState(false)
+  const [noteOpen, setNoteOpen] = useState(false)
   const today = todayLocal()
   const overdue = Boolean(prospect.nextFollowUp && prospect.nextFollowUp < today)
   const call = telHref(prospect.phone)
   const text = smsHref(prospect.phone)
   const mail = mailHref(prospect.email)
   const site = websiteHref(prospect.website)
+  const score = storedScore(prospect)
+  const note = lastNote(prospect.notes)
   const place = [prospect.trade, prospect.city].filter(Boolean).join(' · ')
+  const showPhone = Boolean(prospect.phone && (call || /\d/.test(prospect.phone)))
 
   return (
-    <article className="rounded-2xl border border-[#DDD5C8] bg-[#FBF8F3] p-4">
-      <h2 className="text-xl font-semibold leading-tight break-words">{prospect.businessName}</h2>
-      {place ? <p className="mt-1 text-base text-[#5C564E] break-words">{place}</p> : null}
-      {prospect.source ? <p className="mt-1 text-sm text-[#5C564E]">Source: {prospect.source}</p> : null}
-
-      <fieldset className="mt-4">
-        <legend className="mb-2 text-sm font-semibold text-[#5C564E]">Stage</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {STAGES.map((stage) => {
-            const selected = prospect.stage === stage
-            return (
-              <button
-                key={stage}
-                type="button"
-                aria-pressed={selected}
-                className={`${tap} ${selected ? 'bg-[#1B4332] text-[#F6F3EC]' : 'bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]'}`}
-                onClick={() => onStage(stage)}
-              >
-                {stageLabel(stage)}
-              </button>
-            )
-          })}
+    <article
+      data-prospect={prospect.id}
+      draggable={canDrag}
+      onDragStart={canDrag ? onDragStart : undefined}
+      onDragEnd={canDrag ? onDragEnd : undefined}
+      className={`min-w-0 rounded-2xl border border-[#DDD5C8] bg-[#FBF8F3] p-3 ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${dragging ? 'opacity-60' : ''}`}
+    >
+      <div className="flex items-start gap-2">
+        {canDrag ? (
+          <span className="mt-1 shrink-0 text-[#8A8175]" aria-hidden="true" title="Drag to another column">
+            <Grip />
+          </span>
+        ) : null}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-lg font-semibold leading-tight break-words">{prospect.businessName}</h3>
+            {score ? (
+              <p className="shrink-0 rounded-full bg-[#E7F0EA] px-2 py-1 text-sm font-semibold tabular-nums text-[#1B4332]" aria-label={`Score ${score} out of 5`}>
+                {score}/5
+              </p>
+            ) : null}
+          </div>
+          {place ? <p className="mt-1 text-sm text-[#5C564E] break-words">{place}</p> : null}
         </div>
-      </fieldset>
+      </div>
 
-      <label className="mt-4 block">
+      {showPhone || mail || site ? (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {call ? (
+            <a className={`${tap} bg-[#1B4332] text-[#F6F3EC]`} href={call} aria-label={`Call ${prospect.businessName} at ${prospect.phone}`}>
+              Call
+            </a>
+          ) : null}
+          {text ? (
+            <a className={`${tap} bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]`} href={text} aria-label={`Text ${prospect.businessName} at ${prospect.phone}`}>
+              Text
+            </a>
+          ) : null}
+          {mail ? (
+            <a className={`${tap} bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]`} href={mail} aria-label={`Email ${prospect.email}`}>
+              Email
+            </a>
+          ) : null}
+          {site ? (
+            <a className={`${tap} bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]`} href={site} target="_blank" rel="noopener noreferrer" aria-label={`Website ${prospect.website}`}>
+              Website
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+      {showPhone ? <p className="mt-2 text-sm break-all text-[#5C564E]">{prospect.phone}</p> : null}
+
+      <label className="mt-3 block min-w-0">
         <span className={`mb-1 block text-sm font-semibold ${overdue ? 'text-[#8C3A2F]' : 'text-[#5C564E]'}`}>
           {overdue ? 'Follow-up overdue' : 'Next follow-up'}
         </span>
-        <input className={inputClass} type="date" value={prospect.nextFollowUp} onChange={(event) => onFollowUp(event.target.value)} aria-label={`Follow-up for ${prospect.businessName}`} />
+        <input
+          className={inputClass}
+          type="date"
+          value={prospect.nextFollowUp}
+          onChange={(event) => onFollowUp(event.target.value)}
+          aria-label={`Follow-up for ${prospect.businessName}`}
+        />
       </label>
 
-      {call ? (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <a className={`${tap} bg-[#1B4332] text-[#F6F3EC]`} href={call}>
-            <span>
-              Call
-              <span className="mt-0.5 block text-sm font-medium break-all">{prospect.phone}</span>
-            </span>
-          </a>
-          <a className={`${tap} bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]`} href={text}>
-            <span>
-              Text
-              <span className="mt-0.5 block text-sm font-medium break-all">{prospect.phone}</span>
-            </span>
-          </a>
-        </div>
-      ) : prospect.phone ? (
-        <p className="mt-4 text-base break-words">{prospect.phone}</p>
-      ) : null}
-
-      {mail ? (
-        <a className={`${tap} mt-2 bg-white text-[#1B4332] ring-1 ring-[#DDD5C8] break-all`} href={mail}>
-          {prospect.email}
-        </a>
-      ) : null}
-      {prospect.website ? (
-        site ? (
-          <a className="mt-3 block min-h-12 text-base break-all text-[#1B4332] underline" href={site} target="_blank" rel="noopener noreferrer">
-            {prospect.website}
-          </a>
-        ) : (
-          <p className="mt-3 text-base break-words text-[#5C564E]">{prospect.website}</p>
-        )
-      ) : null}
-
-      {prospect.notes ? (
-        <div className="mt-4">
-          <p className={`text-base whitespace-pre-wrap break-words text-[#3C3832] ${notesOpen ? '' : 'line-clamp-4'}`}>{prospect.notes}</p>
-          {prospect.notes.length > 180 ? (
-            <button type="button" className={`${tap} mt-2 bg-white text-[#1C1915] ring-1 ring-[#DDD5C8]`} onClick={() => setNotesOpen((open) => !open)}>
-              {notesOpen ? 'Show less' : 'Show notes'}
+      {note ? (
+        <div className="mt-3">
+          <p className="text-sm font-semibold text-[#5C564E]">Last note</p>
+          <p className={`mt-1 text-sm whitespace-pre-wrap break-words text-[#3C3832] ${noteOpen ? '' : 'line-clamp-2'}`}>{note}</p>
+          {note.length > 80 ? (
+            <button type="button" className="mt-1 min-h-11 cursor-pointer text-base font-semibold text-[#1B4332] underline" onClick={() => setNoteOpen((open) => !open)}>
+              {noteOpen ? 'Show less' : 'Full note'}
             </button>
           ) : null}
         </div>
       ) : null}
+
+      <label className="mt-3 block min-w-0">
+        <span className="mb-1 block text-sm font-semibold text-[#5C564E]">Move to</span>
+        <select
+          className={inputClass}
+          aria-label={`Move ${prospect.businessName} to another stage`}
+          value={prospect.stage}
+          onChange={(event) => onStage(event.target.value as Stage)}
+        >
+          {STAGES.map((stage) => (
+            <option key={stage} value={stage}>
+              {stageLabel(stage)}
+            </option>
+          ))}
+        </select>
+      </label>
 
       {editing ? (
         <Editor
@@ -612,7 +841,7 @@ function ProspectCard({
           }}
         />
       ) : confirming ? (
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <button type="button" className={`${tap} bg-[#8C3A2F] text-white`} disabled={busy} onClick={onDelete}>
             Delete
           </button>
@@ -621,7 +850,7 @@ function ProspectCard({
           </button>
         </div>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <button type="button" className={`${tap} bg-white ring-1 ring-[#DDD5C8]`} onClick={() => setEditing(true)}>
             Edit
           </button>
@@ -631,6 +860,19 @@ function ProspectCard({
         </div>
       )}
     </article>
+  )
+}
+
+function Grip() {
+  return (
+    <svg width="16" height="20" viewBox="0 0 16 20" fill="currentColor">
+      <circle cx="5" cy="4" r="1.3" />
+      <circle cx="11" cy="4" r="1.3" />
+      <circle cx="5" cy="10" r="1.3" />
+      <circle cx="11" cy="10" r="1.3" />
+      <circle cx="5" cy="16" r="1.3" />
+      <circle cx="11" cy="16" r="1.3" />
+    </svg>
   )
 }
 
@@ -655,7 +897,7 @@ function Editor({
   }
   return (
     <form
-      className="mt-4 grid gap-3 rounded-2xl border border-[#DDD5C8] bg-white p-3"
+      className="mt-3 grid min-w-0 gap-3 rounded-2xl border border-[#DDD5C8] bg-white p-3"
       onSubmit={async (event) => {
         event.preventDefault()
         await onSave(form)
@@ -670,12 +912,12 @@ function Editor({
       <Field label="Website" value={form.website} onChange={(value) => set('website', value)} autoComplete="url" />
       <Field label="Source" value={form.source} onChange={(value) => set('source', value)} />
       {schedule ? (
-        <label className="block">
+        <label className="block min-w-0">
           <span className="mb-1 block text-sm font-semibold">Next follow-up</span>
           <input className={inputClass} type="date" value={form.nextFollowUp} onChange={(event) => set('nextFollowUp', event.target.value)} />
         </label>
       ) : null}
-      <label className="block">
+      <label className="block min-w-0">
         <span className="mb-1 block text-sm font-semibold">Notes</span>
         <textarea className={`${inputClass} min-h-32 py-3`} value={form.notes} onChange={(event) => set('notes', event.target.value)} />
       </label>
@@ -709,7 +951,7 @@ function Field({
   autoComplete?: string
 }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-1 block text-sm font-semibold">{label}</span>
       <input className={inputClass} type={type} value={value} required={required} inputMode={inputMode} autoComplete={autoComplete} onChange={(event) => onChange(event.target.value)} />
     </label>
@@ -721,7 +963,7 @@ function ImportPanel({ busy, onImport }: { busy: boolean; onImport: (prospectsCs
   const [emailsFile, setEmailsFile] = useState<File | null>(null)
   return (
     <form
-      className="mb-4 grid gap-3 rounded-2xl border border-[#DDD5C8] bg-[#FBF8F3] p-4"
+      className="mb-4 grid min-w-0 gap-3 rounded-2xl border border-[#DDD5C8] bg-[#FBF8F3] p-4"
       onSubmit={async (event) => {
         event.preventDefault()
         const prospectsCsv = prospectsFile ? await prospectsFile.text() : ''
@@ -744,7 +986,7 @@ function ImportPanel({ busy, onImport }: { busy: boolean; onImport: (prospectsCs
 
 function FileSlot({ label, file, onChange }: { label: string; file: File | null; onChange: (file: File | null) => void }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-1 block text-sm font-semibold">{label}</span>
       <input
         className={`${inputClass} py-2 file:mr-3 file:min-h-12 file:rounded-xl file:border-0 file:bg-[#1B4332] file:px-4 file:text-base file:font-semibold file:text-[#F6F3EC]`}
@@ -754,127 +996,5 @@ function FileSlot({ label, file, onChange }: { label: string; file: File | null;
       />
       {file ? <span className="mt-1 block text-sm break-all text-[#5C564E]">{file.name}</span> : null}
     </label>
-  )
-}
-
-function ProspectTable({
-  prospects,
-  busy,
-  onStage,
-  onSave,
-  onDelete,
-}: {
-  prospects: Prospect[]
-  busy: boolean
-  onStage: (prospect: Prospect, stage: Stage) => void
-  onSave: (id: string, draft: Draft) => Promise<boolean>
-  onDelete: (id: string) => void
-}) {
-  const [editing, setEditing] = useState<string | null>(null)
-  const today = todayLocal()
-  return (
-    <div className="hidden xl:block">
-      <table className="w-full table-fixed border-separate border-spacing-0 text-left text-sm">
-        <thead>
-          <tr className="text-[#5C564E]">
-            <th className="w-[22%] px-2 py-2 font-semibold">Business</th>
-            <th className="w-[12%] px-2 py-2 font-semibold">Trade</th>
-            <th className="w-[14%] px-2 py-2 font-semibold">City</th>
-            <th className="w-[14%] px-2 py-2 font-semibold">Stage</th>
-            <th className="w-[12%] px-2 py-2 font-semibold">Follow-up</th>
-            <th className="w-[16%] px-2 py-2 font-semibold">Contact</th>
-            <th className="w-[10%] px-2 py-2 font-semibold">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {prospects.map((prospect) => {
-            const call = telHref(prospect.phone)
-            const text = smsHref(prospect.phone)
-            const mail = mailHref(prospect.email)
-            const overdue = Boolean(prospect.nextFollowUp && prospect.nextFollowUp < today)
-            return (
-              <tr key={prospect.id} className="align-top">
-                <td className="border-t border-[#DDD5C8] px-2 py-3">
-                  <p className="font-semibold break-words">{prospect.businessName}</p>
-                  {prospect.source ? <p className="text-[#5C564E] break-words">Source: {prospect.source}</p> : null}
-                  {prospect.notes ? <p className="mt-1 line-clamp-2 whitespace-pre-wrap break-words text-[#3C3832]">{prospect.notes}</p> : null}
-                  {editing === prospect.id ? (
-                    <Editor
-                      title="Edit"
-                      schedule={false}
-                      draft={{
-                        businessName: prospect.businessName,
-                        trade: prospect.trade,
-                        city: prospect.city,
-                        stage: prospect.stage,
-                        notes: prospect.notes,
-                        nextFollowUp: prospect.nextFollowUp,
-                        source: prospect.source,
-                        phone: prospect.phone,
-                        email: prospect.email,
-                        website: prospect.website,
-                      }}
-                      busy={busy}
-                      onCancel={() => setEditing(null)}
-                      onSave={async (draft) => {
-                        const ok = await onSave(prospect.id, draft)
-                        if (ok) setEditing(null)
-                        return ok
-                      }}
-                    />
-                  ) : null}
-                </td>
-                <td className="border-t border-[#DDD5C8] px-2 py-3 break-words">{prospect.trade}</td>
-                <td className="border-t border-[#DDD5C8] px-2 py-3 break-words">{prospect.city}</td>
-                <td className="border-t border-[#DDD5C8] px-2 py-3">
-                  <select className={`${inputClass} min-w-0 max-w-full`} aria-label={`Stage for ${prospect.businessName}`} value={prospect.stage} onChange={(event) => onStage(prospect, event.target.value as Stage)}>
-                    {STAGES.map((stage) => (
-                      <option key={stage} value={stage}>
-                        {stageLabel(stage)}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className={`border-t border-[#DDD5C8] px-2 py-3 break-words ${overdue ? 'font-semibold text-[#8C3A2F]' : ''}`}>
-                  {prospect.nextFollowUp ? (overdue ? `Overdue ${prospect.nextFollowUp}` : prospect.nextFollowUp) : '—'}
-                </td>
-                <td className="border-t border-[#DDD5C8] px-2 py-3">
-                  {call ? (
-                    <p className="break-words">
-                      <a className="font-semibold text-[#1B4332] underline" href={call}>
-                        Call
-                      </a>
-                      {' · '}
-                      <a className="font-semibold text-[#1B4332] underline" href={text}>
-                        Text
-                      </a>
-                    </p>
-                  ) : null}
-                  {mail ? (
-                    <a className="mt-1 block break-all text-[#1B4332] underline" href={mail}>
-                      {prospect.email}
-                    </a>
-                  ) : null}
-                </td>
-                <td className="border-t border-[#DDD5C8] px-2 py-3">
-                  <button type="button" className="min-h-12 font-semibold text-[#1B4332] underline" onClick={() => setEditing(prospect.id)}>
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="mt-2 block min-h-12 font-semibold text-[#8C3A2F] underline"
-                    onClick={() => {
-                      if (window.confirm(`Delete ${prospect.businessName}?`)) onDelete(prospect.id)
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
   )
 }
