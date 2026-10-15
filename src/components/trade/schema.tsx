@@ -241,3 +241,44 @@ export function HomeSchema({
 
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(graph) }} />
 }
+
+export function ServiceAndBusinessSchema({
+  path,
+  name,
+  serviceType,
+  image,
+}: {
+  path: string
+  name: string
+  serviceType: string
+  image: string
+}) {
+  const url = `${SITE}${path}`
+  const businessId = `${url}#localbusiness`
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'LocalBusiness',
+        '@id': businessId,
+        name: 'FrontDesk KC',
+        url,
+        telephone: PHONE_E164,
+        image: `${SITE}${image}`,
+        address: BUSINESS_ADDRESS,
+        areaServed: BUSINESS_AREA,
+      },
+      {
+        '@type': 'Service',
+        '@id': `${url}#service`,
+        name,
+        serviceType,
+        url,
+        areaServed: BUSINESS_AREA,
+        provider: { '@id': businessId },
+      },
+    ],
+  }
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(graph) }} />
+}

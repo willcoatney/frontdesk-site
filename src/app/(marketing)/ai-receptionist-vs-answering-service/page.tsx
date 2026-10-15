@@ -1,5 +1,5 @@
 import { FaqList } from '@/components/trade/faq'
-import { FaqSchema } from '@/components/trade/schema'
+import { FaqSchema, ServiceAndBusinessSchema } from '@/components/trade/schema'
 import { PaperHeading, PaperPage, RelatedLinks } from '@/components/paper/shell'
 import { RECEPTIONIST_COMPARE } from '@/content/pricing'
 import { pageMeta } from '@/lib/page-meta'
@@ -92,7 +92,17 @@ export default function ComparisonPage() {
       kicker="Compare"
       title="An AI receptionist and an answering service are not the same product."
       lede="One is software on your number, with a website included, at a published monthly price. The other is a person, usually priced by the month, the minute, or both. This page says what FrontDesk sells. It does not invent the other side’s rates, and it does not claim we are always cheaper."
-      schema={<FaqSchema path={PATH} faqs={faqs} />}
+      schema={
+        <>
+          <FaqSchema path={PATH} faqs={faqs} />
+          <ServiceAndBusinessSchema
+            path={PATH}
+            name="FrontDesk AI"
+            serviceType="AI receptionist"
+            image="/og/ai-receptionist-vs-answering-service.png"
+          />
+        </>
+      }
     >
       <section className="border-t border-[#E7E0D4] px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-6xl">

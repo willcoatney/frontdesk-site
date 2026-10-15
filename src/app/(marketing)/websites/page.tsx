@@ -2,7 +2,7 @@ import { Check } from 'lucide-react'
 import { PaperHeading, PaperPage, RelatedLinks } from '@/components/paper/shell'
 import { FaqList } from '@/components/trade/faq'
 import { BookDemo } from '@/components/trade/links'
-import { FaqSchema } from '@/components/trade/schema'
+import { FaqSchema, ServiceAndBusinessSchema } from '@/components/trade/schema'
 import styles from '@/components/trade/trade.module.css'
 import { PLANS, PRICING_NOTE } from '@/content/pricing'
 import { pageMeta } from '@/lib/page-meta'
@@ -55,7 +55,17 @@ export default function WebsitesPage() {
       kicker="Kansas City web design"
       title="Kansas City web design, with the phone answered."
       lede="FrontDesk builds the site and the receptionist as one bundle, from a desk in Olathe, for Overland Park and the rest of the metro. Starter is a one-page site at $197 a month. Pro is a multi-page site at $397 a month, and that plan quotes and books. This is not a design-only studio."
-      schema={<FaqSchema path={PATH} faqs={faqs} />}
+      schema={
+        <>
+          <FaqSchema path={PATH} faqs={faqs} />
+          <ServiceAndBusinessSchema
+            path={PATH}
+            name="Kansas City web design with an AI receptionist"
+            serviceType="Web design and AI receptionist"
+            image="/og/websites.png"
+          />
+        </>
+      }
     >
       <section className="border-t border-[#E7E0D4] px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-6xl">
