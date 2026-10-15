@@ -1,7 +1,7 @@
 import { PaperHeading, PaperPage, RelatedLinks } from '@/components/paper/shell'
 import { LeakCalculator } from '@/components/trade/calculator'
 import { FaqList } from '@/components/trade/faq'
-import { FaqSchema } from '@/components/trade/schema'
+import { FaqSchema, ServiceAndBusinessSchema } from '@/components/trade/schema'
 import styles from '@/components/trade/trade.module.css'
 import { missedCallCalculator } from '@/content/missed-call'
 import { UNANSWERED_STUDY } from '@/content/trades/shared'
@@ -55,7 +55,17 @@ export default function MissedCallPage() {
       kicker="Missed-call text-back"
       title="The call you could not take can still get a text."
       lede="You are on a job, the phone rings, and the caller gets voicemail. Missed-call text-back sends them a text so the lead is not a dead end. It is included on Starter at $197 a month, and on Pro and Growth. We are not claiming a reply rate for that text."
-      schema={<FaqSchema path={PATH} faqs={faqs} />}
+      schema={
+        <>
+          <FaqSchema path={PATH} faqs={faqs} />
+          <ServiceAndBusinessSchema
+            path={PATH}
+            name="Missed-call text-back"
+            serviceType="Missed-call text-back"
+            image="/og/missed-call-text-back.png"
+          />
+        </>
+      }
     >
       <section className="border-t border-[#E7E0D4] px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-6xl">
