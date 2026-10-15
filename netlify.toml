@@ -1,8 +1,5 @@
-# FrontDesk KC only. This Netlify site is separate from the concrete site.
-# Base is the path from the repository root. Publish is relative to that base,
-# so the deploy folder is frontdesk-site/out.
+# FrontDesk KC site. Static Next.js export.
 [build]
-  base = "frontdesk-site"
   command = "npm run build"
   publish = "out"
 
