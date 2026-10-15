@@ -1,5 +1,6 @@
 // Relays ElevenLabs post-call webhooks (HMAC-verified) to the FrontDesk lead-alert automation.
 import { createHmac, timingSafeEqual } from 'node:crypto'
+import { readEnvValue } from './_shared/env.mjs'
 
 const RECEIVER_URL = 'https://api2.cursor.sh/automations/webhook/e896c6f2-aba2-5924-8836-ae15718618c1'
 const MAX_AGE_SECONDS = 30 * 60
@@ -82,7 +83,7 @@ export function buildAlert(payload) {
   return { source: 'elevenlabs', conversation_id: d.conversation_id || null, ...lead, call_duration_secs: duration, summary, text: lines.join('\n') }
 }
 
-export async function handle(request, env = process.env, fetchImpl = fetch) {
+export async function handle(request, env = process.env, fetchImpl = fetch, hooks = {}) {
   if (request.method !== 'POST') return json(405, { error: 'method not allowed' })
   const raw = await request.text()
   if (!verifySignature(request.headers.get('elevenlabs-signature'), raw, env.ELEVENLABS_WEBHOOK_SECRET)) {
@@ -96,6 +97,17 @@ export async function handle(request, env = process.env, fetchImpl = fetch) {
   }
   if (payload.type !== 'post_call_transcription') return json(200, { ignored: payload.type || 'unknown' })
 
+  const alert = buildAlert(payload)
+  try {
+    if (hooks.upsertProspect) await hooks.upsertProspect(alert)
+    else {
+      const { upsertFromCallAlert } = await import('./_shared/prospects.mjs')
+      await upsertFromCallAlert(alert)
+    }
+  } catch (error) {
+    console.error('prospect upsert failed', error)
+  }
+
   let auth = env.FRONTDESK_ALERT_WEBHOOK_AUTH || ''
   if (!auth) return json(502, { error: 'forward not configured' })
   if (!/^bearer\s/i.test(auth)) auth = `Bearer ${auth}`
@@ -103,7 +115,7 @@ export async function handle(request, env = process.env, fetchImpl = fetch) {
     const res = await fetchImpl(RECEIVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: auth },
-      body: JSON.stringify(buildAlert(payload)),
+      body: JSON.stringify(alert),
     })
     if (!res.ok) return json(502, { error: 'receiver rejected', status: res.status })
     return json(200, { forwarded: true })
@@ -112,4 +124,8 @@ export async function handle(request, env = process.env, fetchImpl = fetch) {
   }
 }
 
-export default async (request) => handle(request)
+export default async (request) =>
+  handle(request, {
+    ELEVENLABS_WEBHOOK_SECRET: readEnvValue('ELEVENLABS_WEBHOOK_SECRET'),
+    FRONTDESK_ALERT_WEBHOOK_AUTH: readEnvValue('FRONTDESK_ALERT_WEBHOOK_AUTH'),
+  })

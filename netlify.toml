@@ -5,3 +5,26 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Internal pipeline. The HTML shell is static; prospect data is behind the admin function.
+[[headers]]
+for = "/admin"
+[headers.values]
+  X-Robots-Tag = "noindex, nofollow, noarchive"
+  X-Frame-Options = "DENY"
+  Referrer-Policy = "no-referrer"
+  Cache-Control = "private, no-store"
+
+[[headers]]
+for = "/admin.html"
+[headers.values]
+  X-Robots-Tag = "noindex, nofollow, noarchive"
+  X-Frame-Options = "DENY"
+  Referrer-Policy = "no-referrer"
+  Cache-Control = "private, no-store"
+
+[[headers]]
+for = "/api/admin/*"
+[headers.values]
+  X-Robots-Tag = "noindex, nofollow, noarchive"
+  Cache-Control = "no-store"
