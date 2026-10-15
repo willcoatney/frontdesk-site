@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'running calls',
   metadata: {
-    title: 'Answered while you are on the ladder — FrontDesk AI for electricians',
+    title: 'AI Receptionist for Electricians in KC | FrontDesk AI',
     description:
-      'A front office for Kansas City electricians. The line answers while you are on a ladder or in a panel. Starter texts you the lead. Pro quotes service work and books the visit. Built in Olathe.',
-    ogTitle: 'Answered while you are on the ladder',
+      'AI receptionist for Kansas City electricians. Answers on a ladder or in a panel. Starter texts the lead. Pro quotes service work and books the visit.',
+    ogTitle: 'AI Receptionist for Electricians in KC | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City electricians. The phone is covered while you are in a panel. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City electricians. Answers on a ladder or in a panel. Starter texts the lead. Pro quotes service work and books the visit.',
     ogImage: '/og/electricians.png',
     ogAlt: 'FrontDesk AI for Kansas City electricians: the phone is answered while you are on the ladder.',
   },

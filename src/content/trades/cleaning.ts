@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'vans',
   keepDoing: 'cleaning',
   metadata: {
-    title: 'More booked cleans, without a receptionist — FrontDesk AI',
+    title: 'AI Receptionist for Cleaning Companies in KC | FrontDesk AI',
     description:
-      'A done-for-you front office for Kansas City cleaning companies. The line answers while you are in a house. Starter takes the message. Pro quotes and books. Book a 30-minute demo.',
-    ogTitle: 'More booked cleans, without a receptionist',
+      'AI receptionist for Kansas City cleaning companies. The line answers while you are in a house. Starter takes the message. Pro quotes and books.',
+    ogTitle: 'AI Receptionist for Cleaning Companies in KC | FrontDesk AI',
     ogDescription:
-      'Website, voice, chat and text, and a crew dashboard for Kansas City cleaning companies. Plans from $197 a month. Book a 30-minute demo with Will.',
+      'AI receptionist for Kansas City cleaning companies. The line answers while you are in a house. Starter takes the message. Pro quotes and books.',
     ogImage: '/og/cleaning.png',
     ogAlt:
       'FrontDesk AI for cleaning companies: more booked cleans, without hiring a receptionist. Every call and message answered instantly.',

@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'on the roof',
   metadata: {
-    title: 'Answered after the hail — FrontDesk AI for Kansas City roofers',
+    title: 'AI Receptionist for Roofing Companies in KC | FrontDesk AI',
     description:
-      'A front office for Kansas City roofers, built in Olathe for 913 and 816. After a hail storm the line takes the address and the leak. It does not invent a replacement price or an insurance number.',
-    ogTitle: 'Answered while you are on the roof',
+      'AI receptionist for Kansas City roofing companies. After hail, the line takes the address and the leak. No invented replacement price or insurance number.',
+    ogTitle: 'AI Receptionist for Roofing Companies in KC | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City roofing. Hail season calls get a person on the line, not a voicemail. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City roofing companies. After hail, the line takes the address and the leak. No invented replacement price or insurance number.',
     ogImage: '/og/roofing.png',
     ogAlt: 'FrontDesk AI for Kansas City roofers: the phone is answered while you are on the roof, including after hail.',
   },

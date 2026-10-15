@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'painting',
   metadata: {
-    title: 'Answered while the brush is in your hand — FrontDesk AI for painters',
+    title: 'AI Receptionist for Painters in Kansas City | FrontDesk AI',
     description:
-      'A front office for Kansas City painters. The line answers while you are on a ladder or cutting in. Straightforward rooms can sit in a band. Bad walls get a walk. Built in Olathe.',
-    ogTitle: 'Answered while the brush is in your hand',
+      'AI receptionist for Kansas City painters. The line answers on a ladder or while cutting in. Straightforward rooms can sit in a band. Bad walls get a walk.',
+    ogTitle: 'AI Receptionist for Painters in Kansas City | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City painters. Estimates get captured while you are on the ladder. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City painters. The line answers on a ladder or while cutting in. Straightforward rooms can sit in a band. Bad walls get a walk.',
     ogImage: '/og/painters.png',
     ogAlt: 'FrontDesk AI for Kansas City painters: the phone is answered while the brush is in your hand.',
   },

@@ -12,12 +12,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'on the call',
   metadata: {
-    title: 'Answered while you are under the sink — FrontDesk AI for plumbers',
+    title: 'AI Receptionist for Plumbers in Kansas City | FrontDesk AI',
     description:
-      'A front office for Kansas City plumbers, built in Olathe for 913 and 816. The line answers while you are under a sink or in a crawlspace. Starter texts you the lead. Pro books the window.',
-    ogTitle: 'Answered while you are under the sink',
+      'AI receptionist for Kansas City plumbers. Answers under a sink or in a crawlspace, on 913 and 816 numbers. Starter texts the lead. Pro books the window.',
+    ogTitle: 'AI Receptionist for Plumbers in Kansas City | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City plumbers. The phone is covered on both sides of the state line. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City plumbers. Answers under a sink or in a crawlspace, on 913 and 816 numbers. Starter texts the lead. Pro books the window.',
     ogImage: '/og/plumbers.png',
     ogAlt: 'FrontDesk AI for Kansas City plumbers: the phone is answered while you are under the sink.',
   },
