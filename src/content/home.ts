@@ -72,6 +72,11 @@ export const included = [
     body: 'One page on Starter. A multi-page site on Pro and Growth, written around the work you do here. This is not a design-only studio.',
   },
   {
+    title: 'Business email',
+    plan: 'Setup',
+    body: 'Will sets up mail on your domain so the address matches the company on the truck and the Google listing.',
+  },
+  {
     title: 'AI voice receptionist',
     plan: 'Every plan',
     body: 'It answers the number already on the truck, the site, and the Google listing. Starter takes a message and texts you. Pro and Growth quote inside bands you approve and book.',
