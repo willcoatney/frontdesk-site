@@ -140,14 +140,14 @@ function useBoardLayout() {
   const [layout, setLayout] = useState({ wide: false, drag: false })
   useEffect(() => {
     const wide = window.matchMedia('(min-width: 1280px)')
-    const drag = window.matchMedia('(min-width: 1280px) and (pointer: fine)')
-    const update = () => setLayout({ wide: wide.matches, drag: drag.matches })
+    const coarse = window.matchMedia('(pointer: coarse)')
+    const update = () => setLayout({ wide: wide.matches, drag: wide.matches && !coarse.matches })
     update()
     wide.addEventListener('change', update)
-    drag.addEventListener('change', update)
+    coarse.addEventListener('change', update)
     return () => {
       wide.removeEventListener('change', update)
-      drag.removeEventListener('change', update)
+      coarse.removeEventListener('change', update)
     }
   }, [])
   return layout
