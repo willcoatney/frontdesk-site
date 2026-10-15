@@ -450,7 +450,7 @@ export default function Page() {
               Fifteen minutes. Your number. Your week.
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-[#D7E6DC] sm:text-lg">
-              Bring the calls you missed this week. Will will say which plan fits, or that it does not. No slide deck,
+              Bring the calls you missed this week. On the demo we say which plan fits, or that it does not. No slide deck,
               and no invented close rate.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
