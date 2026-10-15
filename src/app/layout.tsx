@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { Analytics } from '@/components/analytics'
 import { HOME_DESCRIPTION, HOME_OG_ALT, HOME_TITLE } from '@/content/home'
 import './globals.css'
 
@@ -56,7 +57,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className={`${inter.className} min-h-full`}>{children}</body>
+      <body className={`${inter.className} min-h-full`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }
