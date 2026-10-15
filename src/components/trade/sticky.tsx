@@ -33,6 +33,7 @@ export function StickyCta() {
 
   return (
     <div
+      id="sticky-cta"
       role="region"
       aria-label="Book a demo or call"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-[#DDD5C8] bg-[#F3EFE7]/95 px-3 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_-24px_rgba(28,25,21,0.45)] backdrop-blur-md md:hidden"
