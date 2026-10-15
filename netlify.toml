@@ -28,3 +28,9 @@ for = "/api/admin/*"
 [headers.values]
   X-Robots-Tag = "noindex, nofollow, noarchive"
   Cache-Control = "no-store"
+
+[[headers]]
+for = "/.netlify/functions/admin-booking"
+[headers.values]
+  X-Robots-Tag = "noindex, nofollow, noarchive"
+  Cache-Control = "no-store"
