@@ -9,12 +9,12 @@ import {
   hitsChatWidget,
   isAdminPath,
   linkLocation,
-  measurementId,
   pendingScrollMarks,
+  resolveMeasurementId,
   SCROLL_MARKS,
 } from '@/lib/analytics-events.mjs'
 
-const GA_MEASUREMENT_ID = measurementId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID)
+const GA_MEASUREMENT_ID = resolveMeasurementId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID)
 
 type Gtag = (...args: unknown[]) => void
 
@@ -35,7 +35,11 @@ function installGtag(id: string) {
   }
   if (window.__fdGaConfigured === id) return
   window.gtag('js', new Date())
-  window.gtag('config', id, { send_page_view: false })
+  window.gtag('config', id, {
+    send_page_view: false,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  })
   window.__fdGaConfigured = id
 }
 
