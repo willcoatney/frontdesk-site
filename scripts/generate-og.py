@@ -24,6 +24,13 @@ PAGES = [
     ("mobile-detailing", "Mobile detailing", "Answered while you are on a driveway."),
     ("lawn-care", "Lawn care", "Answered while you are on the mower."),
     ("pest-control", "Pest control", "Answered while you are under the house."),
+    ("plumbers", "Plumbers", "Answered while you are under the sink."),
+    ("hvac", "HVAC", "Answered while you are on the roof."),
+    ("roofing", "Roofing", "Answered after the hail."),
+    ("pricing", "Pricing", "Starter $197. Pro $397. Growth $797 and up."),
+    ("missed-call-text-back", "Missed calls", "The call you missed can text back."),
+    ("ai-receptionist-vs-answering-service", "Compare", "An AI receptionist and an answering service."),
+    ("websites", "Websites", "Kansas City web design, with the phone answered."),
 ]
 
 

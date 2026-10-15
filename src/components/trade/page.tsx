@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { PLANS, PRICING_NOTE } from '@/content/pricing'
-import { tradeNav } from '@/content/trades/nav'
 import type { StepExtra, TradeConfig } from '@/content/trades/types'
 import { BeforeAfter } from './compare'
 import { LeakCalculator } from './calculator'
 import { BOOK_HREF, PHONE, PHONE_HREF } from './constants'
+import { SiteFooter } from './footer'
 import { ProductDemos } from './demos'
 import { FaqList } from './faq'
 import { BookDemo, CallWill } from './links'
@@ -404,37 +404,7 @@ export function TradePage({ trade }: { trade: TradeConfig }) {
         </div>
       </section>
 
-      <footer className="border-t border-[#E7E0D4] px-4 py-8 sm:px-6">
-        <div className="mx-auto max-w-6xl">
-          <nav aria-label="Trades" className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            {tradeNav.map((item) =>
-              item.slug === trade.slug ? (
-                <span key={item.slug} aria-current="page" className="font-semibold text-[#1C1915]">
-                  {item.label}
-                </span>
-              ) : (
-                <Link key={item.slug} href={`/${item.slug}`} className="text-[#1B4332] underline underline-offset-4">
-                  {item.label}
-                </Link>
-              ),
-            )}
-          </nav>
-          <div className="mt-4 flex flex-col gap-3 text-sm text-[#5C564E] sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-semibold text-[#1C1915]">
-              FrontDesk AI <span className="font-normal text-[#5C564E]">· FrontDesk KC · Olathe, KS</span>
-            </p>
-            <p>© {new Date().getFullYear()} FrontDesk KC</p>
-            <p className="flex flex-wrap gap-4">
-              <Link href="/" className="underline underline-offset-4">
-                All service businesses
-              </Link>
-              <a href={PHONE_HREF} className="font-semibold text-[#1B4332] underline underline-offset-4">
-                {PHONE}
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter currentSlug={trade.slug} />
 
       <StickyCta />
     </div>

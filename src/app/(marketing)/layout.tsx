@@ -1,0 +1,5 @@
+import { display } from '@/components/display-font'
+
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+  return <div className={display.variable}>{children}</div>
+}

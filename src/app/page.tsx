@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { PLANS, PRICING_NOTE } from '@/content/pricing'
+import { siteNav } from '@/content/site-nav'
 import { tradeNav } from '@/content/trades/nav'
 import {
   Phone,
@@ -174,7 +175,7 @@ export default function FrontDeskAIPage() {
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#who-its-for" className="hover:text-white transition-colors">Who It's For</a>
             <Link href="/cleaning" className="hover:text-white transition-colors">Cleaning</Link>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </div>
           <a
@@ -852,6 +853,15 @@ export default function FrontDeskAIPage() {
           <p className="mt-8 text-white/35 text-sm">
             {PRICING_NOTE}
           </p>
+          <p className="mt-4 text-sm text-white/45">
+            <Link href="/pricing" className="text-indigo-300 hover:text-white">Full pricing and FAQ</Link>
+            <span aria-hidden> · </span>
+            <Link href="/missed-call-text-back" className="text-indigo-300 hover:text-white">Missed-call text-back</Link>
+            <span aria-hidden> · </span>
+            <Link href="/ai-receptionist-vs-answering-service" className="text-indigo-300 hover:text-white">Vs an answering service</Link>
+            <span aria-hidden> · </span>
+            <Link href="/websites" className="text-indigo-300 hover:text-white">Kansas City web design</Link>
+          </p>
         </div>
       </section>
 
@@ -917,18 +927,27 @@ export default function FrontDeskAIPage() {
 
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/10 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <Bot className="w-3.5 h-3.5 text-white" />
+        <div className="max-w-6xl mx-auto flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                <Bot className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="font-bold">FrontDesk AI</span>
+              <span className="text-white/30 text-sm">· FrontDesk KC · Olathe, KS</span>
             </div>
-            <span className="font-bold">FrontDesk AI</span>
-            <span className="text-white/30 text-sm">· FrontDesk KC · Olathe, KS</span>
+            <p className="text-white/30 text-sm">
+              © {new Date().getFullYear()} FrontDesk KC. All rights reserved.
+            </p>
           </div>
-          <p className="text-white/30 text-sm">
-            © {new Date().getFullYear()} FrontDesk KC. All rights reserved.
-          </p>
-          <nav aria-label="Trades" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-white/40">
+          <nav aria-label="Pages" className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-white/50">
+            {siteNav.map((item) => (
+              <Link key={item.href} href={item.href} className="hover:text-white/80 transition-colors">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <nav aria-label="Trades" className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-sm text-white/40">
             {tradeNav.map((trade) => (
               <Link key={trade.slug} href={`/${trade.slug}`} className="hover:text-white/70 transition-colors">
                 {trade.label}

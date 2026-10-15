@@ -4,7 +4,10 @@ import handyman from './handyman'
 import lawnCare from './lawn-care'
 import mobileDetailing from './mobile-detailing'
 import painters from './painters'
+import hvac from './hvac'
 import pestControl from './pest-control'
+import plumbers from './plumbers'
+import roofing from './roofing'
 import treeService from './tree-service'
 import { tradeNav } from './nav'
 import type { TradeConfig } from './types'
@@ -18,6 +21,9 @@ export const trades: TradeConfig[] = [
   mobileDetailing,
   lawnCare,
   pestControl,
+  plumbers,
+  hvac,
+  roofing,
 ]
 
 const slugs = trades.map((trade) => trade.slug)
