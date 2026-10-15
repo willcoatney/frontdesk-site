@@ -63,9 +63,15 @@ export function toPublic(prospect) {
     phone: prospect.phone,
     email: prospect.email,
     website: prospect.website,
+    score_1to5: cleanScore(prospect.score_1to5),
     createdAt: prospect.createdAt,
     updatedAt: prospect.updatedAt,
   }
+}
+
+function cleanScore(value) {
+  const text = String(value ?? '').trim()
+  return /^[1-5]$/.test(text) ? text : ''
 }
 
 function blankProspect(now) {
@@ -82,6 +88,7 @@ function blankProspect(now) {
     phone: '',
     email: '',
     website: '',
+    score_1to5: '',
     conversationId: '',
     createdAt: iso,
     updatedAt: iso,
@@ -103,6 +110,7 @@ function normalizeStored(raw) {
     phone: String(raw.phone || ''),
     email: String(raw.email || ''),
     website: String(raw.website || ''),
+    score_1to5: cleanScore(raw.score_1to5),
     conversationId: String(raw.conversationId || ''),
     createdAt: String(raw.createdAt || ''),
     updatedAt: String(raw.updatedAt || ''),
@@ -322,6 +330,7 @@ export function importRecords(existing, input, now = new Date()) {
       prospect.city = row.city || ''
       prospect.phone = row.phone || ''
       prospect.website = row.website || ''
+      prospect.score_1to5 = cleanScore(row.score_1to5)
       prospect.stage = 'new'
       prospect.source = RESEARCH_SOURCE
       prospect.notes = notes
@@ -339,6 +348,7 @@ export function importRecords(existing, input, now = new Date()) {
       city: row.city || '',
       phone: row.phone || '',
       website: row.website || '',
+      score_1to5: cleanScore(row.score_1to5),
       source: RESEARCH_SOURCE,
     })
     prospect.notes = appendUnique(prospect.notes, notes)
