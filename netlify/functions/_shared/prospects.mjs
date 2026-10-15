@@ -64,6 +64,8 @@ export function toPublic(prospect) {
     email: prospect.email,
     website: prospect.website,
     score_1to5: cleanScore(prospect.score_1to5),
+    demoAt: typeof prospect.demoAt === 'string' ? prospect.demoAt : '',
+    demoEventId: String(prospect.demoEventId || ''),
     createdAt: prospect.createdAt,
     updatedAt: prospect.updatedAt,
   }
@@ -89,6 +91,8 @@ function blankProspect(now) {
     email: '',
     website: '',
     score_1to5: '',
+    demoAt: '',
+    demoEventId: '',
     conversationId: '',
     createdAt: iso,
     updatedAt: iso,
@@ -111,6 +115,8 @@ function normalizeStored(raw) {
     email: String(raw.email || ''),
     website: String(raw.website || ''),
     score_1to5: cleanScore(raw.score_1to5),
+    demoAt: typeof raw.demoAt === 'string' ? raw.demoAt : '',
+    demoEventId: String(raw.demoEventId || ''),
     conversationId: String(raw.conversationId || ''),
     createdAt: String(raw.createdAt || ''),
     updatedAt: String(raw.updatedAt || ''),
@@ -234,6 +240,8 @@ export function updateProspectRecord(list, id, input, now = new Date()) {
     ...clean.prospect,
     id: list[index].id,
     conversationId: list[index].conversationId,
+    demoAt: list[index].demoAt,
+    demoEventId: list[index].demoEventId,
     createdAt: list[index].createdAt,
     updatedAt: nowIso(now),
   }
@@ -458,6 +466,107 @@ export function applyInbound(list, alert, now = new Date()) {
   prospect.notes = note
   prospect.conversationId = conversationId
   return { prospects: [...list, prospect], prospect: toPublic(prospect), created: true }
+}
+
+const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/
+
+function bookingNote(booking) {
+  return ['Demo booking', `When: ${booking.start}`, `Event: ${booking.eventId}`, booking.notes ? `Note: ${booking.notes}` : '']
+    .filter(Boolean)
+    .join('\n')
+}
+
+export function validateBooking(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return { error: 'Invalid booking' }
+  const name = String(input.name ?? '').trim()
+  const email = String(input.email ?? '').trim()
+  const phone = String(input.phone ?? '').trim()
+  const eventId = String(input.eventId ?? '').trim()
+  const notes = String(input.notes ?? '').trim()
+  const startRaw = String(input.start ?? '').trim()
+  if (!name) return { error: 'Name is required' }
+  if (name.length > 200) return { error: 'A field is too long' }
+  if (!email || email.length > 200 || !/^[^\s@]+@[^\s@]+$/.test(email)) return { error: 'Email looks invalid' }
+  if (phone.length > 160 || /[\r\n]/.test(phone)) return { error: 'Phone looks invalid' }
+  if (!eventId || eventId.length > 200 || /[\r\n]/.test(eventId)) return { error: 'Event id is required' }
+  if (notes.length > 20000) return { error: 'A field is too long' }
+  if (!ISO_INSTANT.test(startRaw)) return { error: 'Start time is invalid' }
+  const parsed = Date.parse(startRaw)
+  if (!Number.isFinite(parsed)) return { error: 'Start time is invalid' }
+  return {
+    booking: {
+      name,
+      email,
+      phone,
+      eventId,
+      notes,
+      start: new Date(parsed).toISOString(),
+    },
+  }
+}
+
+// A repeat of the same event updates that prospect. Otherwise match email, then a
+// unique phone, then the business name. Won and lost stay put so a booking does
+// not reopen a closed prospect; the demo time is still stored.
+export function applyBooking(list, input, now = new Date()) {
+  const clean = validateBooking(input)
+  if (clean.error) return clean
+  const booking = clean.booking
+  const note = bookingNote(booking)
+  const iso = nowIso(now)
+
+  let index = list.findIndex((prospect) => prospect.demoEventId && prospect.demoEventId === booking.eventId)
+  if (index < 0) {
+    index = list.findIndex((prospect) => prospect.email && prospect.email.toLowerCase() === booking.email.toLowerCase())
+  }
+  if (index < 0 && phoneKey(booking.phone)) {
+    const key = phoneKey(booking.phone)
+    const matches = []
+    list.forEach((prospect, at) => {
+      if (phoneKey(prospect.phone) === key) matches.push(at)
+    })
+    if (matches.length === 1) index = matches[0]
+  }
+  if (index < 0) {
+    const key = nameKey(booking.name)
+    index = list.findIndex((prospect) => key && nameKey(prospect.businessName) === key)
+  }
+
+  if (index < 0) {
+    if (list.length >= MAX_PROSPECTS) return { error: 'Too many prospects' }
+    const prospect = blankProspect(now)
+    prospect.businessName = booking.name
+    prospect.email = booking.email
+    prospect.phone = booking.phone
+    prospect.stage = 'demo booked'
+    prospect.source = 'booking'
+    prospect.demoAt = booking.start
+    prospect.demoEventId = booking.eventId
+    prospect.notes = note
+    return { prospects: [...list, prospect], action: 'created', id: prospect.id }
+  }
+
+  const current = { ...list[index] }
+  const before = JSON.stringify(current)
+  if (!current.email) current.email = booking.email
+  else if (current.email.toLowerCase() !== booking.email.toLowerCase()) {
+    current.notes = appendUnique(current.notes, `Alternate email: ${booking.email}`)
+  }
+  if (!current.phone && booking.phone) current.phone = booking.phone
+  else if (booking.phone && phoneKey(current.phone) && phoneKey(current.phone) !== phoneKey(booking.phone)) {
+    current.notes = appendUnique(current.notes, `Alternate phone: ${booking.phone}`)
+  }
+  if ((!current.businessName || current.businessName === 'Inbound caller') && booking.name) current.businessName = booking.name
+  if (!current.source) current.source = 'booking'
+  if (current.stage !== 'won' && current.stage !== 'lost') current.stage = 'demo booked'
+  current.demoAt = booking.start
+  current.demoEventId = booking.eventId
+  current.notes = appendUnique(current.notes, note)
+  if (JSON.stringify(current) === before) return { prospects: list, action: 'unchanged', id: current.id }
+  current.updatedAt = iso
+  const prospects = list.slice()
+  prospects[index] = current
+  return { prospects, action: 'updated', id: current.id }
 }
 
 export async function upsertFromCallAlert(alert, store) {

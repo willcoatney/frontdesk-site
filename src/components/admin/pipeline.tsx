@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type HTMLAttributes, type KeyboardEvent } from 'react'
+import { compareDemoBooked, formatDemoCentral } from './demo-time.mjs'
 
 const STAGES = ['new', 'contacted', 'replied', 'demo booked', 'won', 'lost'] as const
 
@@ -19,6 +20,8 @@ type Prospect = {
   email: string
   website: string
   score_1to5?: string
+  demoAt?: string
+  demoEventId?: string
   createdAt: string
   updatedAt: string
 }
@@ -264,6 +267,7 @@ export function Pipeline() {
   const byStage = useMemo(() => {
     const grouped = Object.fromEntries(STAGES.map((stage) => [stage, [] as Prospect[]])) as Record<Stage, Prospect[]>
     for (const prospect of visible) grouped[prospect.stage].push(prospect)
+    grouped['demo booked'].sort((a, b) => compareDemoBooked(a, b) || compareProspects(a, b))
     return grouped
   }, [visible])
 
@@ -718,6 +722,7 @@ function ProspectCard({
   const mail = mailHref(prospect.email)
   const site = websiteHref(prospect.website)
   const score = storedScore(prospect)
+  const demoLabel = formatDemoCentral(prospect.demoAt)
   const note = lastNote(prospect.notes)
   const place = [prospect.trade, prospect.city].filter(Boolean).join(' · ')
   const showPhone = Boolean(prospect.phone && (call || /\d/.test(prospect.phone)))
@@ -748,6 +753,10 @@ function ProspectCard({
           {place ? <p className="mt-1 text-sm text-[#5C564E] break-words">{place}</p> : null}
         </div>
       </div>
+
+      {demoLabel ? (
+        <p className="mt-3 rounded-xl bg-[#E7F0EA] px-3 py-2 text-base font-semibold leading-snug text-[#1B4332]">{demoLabel}</p>
+      ) : null}
 
       {showPhone || mail || site ? (
         <div className="mt-3 grid grid-cols-2 gap-2">
