@@ -101,7 +101,7 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
-                <BookDemo className="mt-6 w-full">Book a Demo</BookDemo>
+                <BookDemo className="mt-6 w-full" />
               </article>
             ))}
           </div>

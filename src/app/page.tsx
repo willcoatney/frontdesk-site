@@ -1,16 +1,15 @@
 import Link from 'next/link'
-import { Calendar, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { display } from '@/components/display-font'
 import { ElevenLabsWidgetSlot } from '@/components/elevenlabs-widget-slot'
 import { PaperHeading } from '@/components/paper/shell'
 import { LeakCalculator } from '@/components/trade/calculator'
 import { BeforeAfter } from '@/components/trade/compare'
 import { PHONE, PHONE_HREF } from '@/components/trade/constants'
-import { BOOKING_URL } from '@/content/booking'
 import { ProductDemos } from '@/components/trade/demos'
 import { SiteFooter } from '@/components/trade/footer'
 import { FaqList } from '@/components/trade/faq'
-import { BookDemo } from '@/components/trade/links'
+import { BookDemo, CallWill } from '@/components/trade/links'
 import { HomeSchema } from '@/components/trade/schema'
 import { StickyCta } from '@/components/trade/sticky'
 import styles from '@/components/trade/trade.module.css'
@@ -50,14 +49,6 @@ export const metadata = pageMeta({
 
 const focus =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]'
-
-// This CTA uses the new demo number directly so it does not depend on the sitewide phone constant.
-const DEMO_CALL = '(913) 349-8507'
-const DEMO_CALL_HREF = 'tel:+19133498507'
-
-function bookingLinkProps(url: string) {
-  return /^https?:\/\//i.test(url) ? { target: '_blank' as const, rel: 'noopener noreferrer' } : {}
-}
 
 function SeePricing({ className = '' }: { className?: string }) {
   return (
@@ -113,7 +104,7 @@ export default function Page() {
                 FAQ
               </a>
             </nav>
-            <BookDemo className="shrink-0 px-3.5 sm:px-5" />
+            <BookDemo header className="shrink-0" />
           </div>
         </header>
 
@@ -134,20 +125,8 @@ export default function Page() {
                 commercial. Will Coatney builds it from Olathe, and he is in Kansas City when you need a person.
               </p>
               <div id="top-cta" className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <a
-                  href={BOOKING_URL}
-                  {...bookingLinkProps(BOOKING_URL)}
-                  className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] px-5 text-center text-base font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_12px_28px_-16px_rgba(27,67,50,0.95)] transition-colors hover:bg-[#245C45] sm:w-auto ${focus}`}
-                >
-                  <Calendar className="size-4 shrink-0" aria-hidden />
-                  Book a 15-minute demo
-                </a>
-                <a
-                  href={DEMO_CALL_HREF}
-                  className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#DDD5C8] bg-[#FBF8F3] px-5 text-center text-base font-semibold text-[#1C1915] transition-colors hover:border-[#1B4332] sm:w-auto ${focus}`}
-                >
-                  Or call {DEMO_CALL}
-                </a>
+                <BookDemo className="w-full sm:w-auto" />
+                <CallWill className="w-full sm:w-auto" />
                 <SeePricing className="w-full sm:w-auto" />
               </div>
               <p className="mt-4 text-sm text-[#5C564E]">
@@ -428,7 +407,7 @@ export default function Page() {
                       </li>
                     ))}
                   </ul>
-                  <BookDemo className="mt-6 w-full">Book a 15-minute demo</BookDemo>
+                  <BookDemo className="mt-6 w-full" />
                 </article>
               ))}
             </div>
@@ -442,7 +421,7 @@ export default function Page() {
             </aside>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <SeePricing className="w-full sm:w-auto" />
-              <BookDemo className="w-full sm:w-auto">Book a 15-minute demo</BookDemo>
+              <BookDemo className="w-full sm:w-auto" />
             </div>
             <nav aria-label="Related pages" className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
               {siteNav.map((item) => (
@@ -473,19 +452,8 @@ export default function Page() {
               and no invented close rate.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a
-                href={BOOKING_URL}
-                {...bookingLinkProps(BOOKING_URL)}
-                className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#F6F3EC] px-5 text-center text-base font-semibold text-[#1B4332] hover:bg-white sm:w-auto ${focus}`}
-              >
-                Book a 15-minute demo
-              </a>
-              <a
-                href={DEMO_CALL_HREF}
-                className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/30 px-5 text-center text-base font-semibold text-white hover:bg-white/10 sm:w-auto ${focus}`}
-              >
-                Or call {DEMO_CALL}
-              </a>
+              <BookDemo tone="inverse" className="w-full sm:w-auto" />
+              <CallWill tone="inverse" className="w-full sm:w-auto" />
             </div>
             <p className="mt-5 text-sm text-[#D7E6DC]">
               <Link href="/pricing" className="font-semibold text-white underline underline-offset-4">

@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { siteNav } from '@/content/site-nav'
 import { SiteFooter } from '@/components/trade/footer'
-import { BOOK_HREF, PHONE, PHONE_HREF } from '@/components/trade/constants'
 import { BookDemo, CallWill } from '@/components/trade/links'
 import { StickyCta } from '@/components/trade/sticky'
 import styles from '@/components/trade/trade.module.css'
@@ -92,7 +91,7 @@ export function PaperPage({
               ),
             )}
           </nav>
-          <BookDemo className="shrink-0 px-3.5 sm:px-5" />
+          <BookDemo header className="shrink-0" />
         </div>
       </header>
 
@@ -104,7 +103,7 @@ export function PaperPage({
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#3C3832] sm:text-lg">{lede}</p>
           <div id="top-cta" className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <BookDemo className="w-full sm:w-auto">Book a Demo</BookDemo>
+            <BookDemo className="w-full sm:w-auto" />
             <CallWill className="w-full sm:w-auto" />
           </div>
           <p className="mt-4 text-sm text-[#5C564E]">
@@ -124,20 +123,8 @@ export function PaperPage({
             The demo is where we match a plan to the calls you actually get. No slide deck, and no invented close rate.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <a
-              href={BOOK_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#F6F3EC] px-5 text-base font-semibold text-[#1B4332] hover:bg-white"
-            >
-              Book a Demo
-            </a>
-            <a
-              href={PHONE_HREF}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-5 text-base font-semibold text-white hover:bg-white/10"
-            >
-              Call {PHONE}
-            </a>
+            <BookDemo tone="inverse" className="w-full sm:w-auto" />
+            <CallWill tone="inverse" className="w-full sm:w-auto" />
           </div>
           <p className="mt-5 text-sm text-[#D7E6DC]">
             Overland Park, Olathe, Shawnee, Lenexa, Lee’s Summit, and the rest of the Kansas City metro.

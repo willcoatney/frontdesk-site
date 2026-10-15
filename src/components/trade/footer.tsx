@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { siteNav } from '@/content/site-nav'
 import { tradeNav } from '@/content/trades/nav'
-import { PHONE, PHONE_HREF } from './constants'
+import { BookDemo, CallWill } from './links'
 
 export function SiteFooter({
   currentSlug,
@@ -39,18 +39,19 @@ export function SiteFooter({
             ),
           )}
         </nav>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <BookDemo className="w-full sm:w-auto" />
+          <CallWill className="w-full sm:w-auto" />
+        </div>
         <div className="mt-4 flex flex-col gap-3 text-sm text-[#5C564E] sm:flex-row sm:items-center sm:justify-between">
           <p className="font-semibold text-[#1C1915]">
             FrontDesk AI <span className="font-normal text-[#5C564E]">· FrontDesk KC · Olathe, KS</span>
           </p>
           <p>© {new Date().getFullYear()} FrontDesk KC</p>
-          <p className="flex flex-wrap gap-4">
+          <p>
             <Link href="/" className="underline underline-offset-4">
               All service businesses
             </Link>
-            <a href={PHONE_HREF} className="font-semibold text-[#1B4332] underline underline-offset-4">
-              {PHONE}
-            </a>
           </p>
         </div>
       </div>

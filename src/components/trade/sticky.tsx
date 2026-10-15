@@ -38,8 +38,8 @@ export function StickyCta() {
       className="fixed inset-x-0 bottom-0 z-50 border-t border-[#DDD5C8] bg-[#F3EFE7]/95 px-3 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_-24px_rgba(28,25,21,0.45)] backdrop-blur-md md:hidden"
     >
       <div className="grid grid-cols-2 gap-2">
-        <CallWill compact className="w-full px-3" />
-        <BookDemo className="w-full px-3">Book a Demo</BookDemo>
+        <BookDemo compact className="w-full" />
+        <CallWill compact className="w-full" />
       </div>
     </div>
   )
