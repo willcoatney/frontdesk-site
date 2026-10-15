@@ -6,15 +6,14 @@ import type { DemoConfig } from '@/content/trades/types'
 
 export const HOME_PATH = '/'
 
-export const HOME_TITLE = 'Never miss a call or a lead — FrontDesk AI for Kansas City'
+export const HOME_TITLE = 'AI Receptionist for Kansas City Businesses | FrontDesk AI'
 
 export const HOME_DESCRIPTION =
-  'Website, phone answering, and follow-up for Kansas City service businesses, for one monthly price. Built in Olathe by Will Coatney. Plans from $197 a month.'
+  'AI receptionist for Kansas City businesses. An AI answering service for small business: the website, phone answering, and follow-up for one monthly price.'
 
-export const HOME_OG_TITLE = 'Never miss a call or a lead.'
+export const HOME_OG_TITLE = HOME_TITLE
 
-export const HOME_OG_DESCRIPTION =
-  'Website, answering, and follow-up for one monthly price. Built in Olathe for Kansas City owner-operators. Plans from $197 a month.'
+export const HOME_OG_DESCRIPTION = HOME_DESCRIPTION
 
 export const HOME_OG_IMAGE = '/og/home.png'
 
