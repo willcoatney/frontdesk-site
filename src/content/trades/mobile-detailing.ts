@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'van',
   keepDoing: 'on driveways',
   metadata: {
-    title: 'Answered while you are on a driveway — FrontDesk AI for mobile detailers',
+    title: 'AI Receptionist for Mobile Detailing in KC | FrontDesk AI',
     description:
-      'A front office for Kansas City mobile detailers. The line answers while you are buffing a car. Maintenance details can sit in a band. Paint correction is a look. Built in Olathe.',
-    ogTitle: 'Answered while you are on a driveway',
+      'AI receptionist for Kansas City mobile detailers. Answers while you are buffing a car. Maintenance details can sit in a band. Paint correction is a look.',
+    ogTitle: 'AI Receptionist for Mobile Detailing in KC | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City mobile detailing. The next driveway gets booked while your hands are on a car. Plans from $197 a month. Book a demo with Will.',
+      'AI receptionist for Kansas City mobile detailers. Answers while you are buffing a car. Maintenance details can sit in a band. Paint correction is a look.',
     ogImage: '/og/mobile-detailing.png',
     ogAlt: 'FrontDesk AI for Kansas City mobile detailers: the phone is answered while you are on a driveway.',
   },

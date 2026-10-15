@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'on routes',
   metadata: {
-    title: 'Answered while you are under the house — FrontDesk AI for pest control',
+    title: 'AI Receptionist for Pest Control in KC | FrontDesk AI',
     description:
-      'A front office for Kansas City pest control companies. The line answers while you are in a crawlspace. General pest can sit in a band. Termites are an inspection. Built in Olathe.',
-    ogTitle: 'Answered while you are under the house',
+      'AI receptionist for Kansas City pest control companies. The line answers in a crawlspace. General pest can sit in a band. Termites are an inspection.',
+    ogTitle: 'AI Receptionist for Pest Control in KC | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City pest control. The phone is covered while you are under a house. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City pest control companies. The line answers in a crawlspace. General pest can sit in a band. Termites are an inspection.',
     ogImage: '/og/pest-control.png',
     ogAlt: 'FrontDesk AI for Kansas City pest control: the phone is answered while you are under the house.',
   },

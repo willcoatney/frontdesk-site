@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'truck',
   keepDoing: 'on the tools',
   metadata: {
-    title: 'Answered while you are mid-repair — FrontDesk AI for handymen',
+    title: 'AI Receptionist for Handymen in Kansas City | FrontDesk AI',
     description:
-      'A front office for Kansas City handymen. The line answers while you are under a sink or on a drywall patch. Small jobs can sit in a band. Built and run from Olathe.',
-    ogTitle: 'Answered while you are mid-repair',
+      'AI receptionist for Kansas City handymen. The line answers while you are under a sink or on a drywall patch. Small jobs can sit in a band. Built in Olathe.',
+    ogTitle: 'AI Receptionist for Handymen in Kansas City | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City handymen. The punch list can wait. The phone should not. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City handymen. The line answers while you are under a sink or on a drywall patch. Small jobs can sit in a band. Built in Olathe.',
     ogImage: '/og/handyman.png',
     ogAlt: 'FrontDesk AI for Kansas City handymen: the phone is answered while you are mid-repair.',
   },

@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'on the roof or in the attic',
   metadata: {
-    title: 'Answered while you are on the roof — FrontDesk AI for HVAC',
+    title: 'AI Receptionist for HVAC Companies in KC | FrontDesk AI',
     description:
-      'A front office for Kansas City heating and air companies, built in Olathe for 913 and 816. The line answers while you are on a roof or in an attic. Maintenance can sit in a band. A replacement is a look.',
-    ogTitle: 'Answered while you are on the roof',
+      'AI receptionist for Kansas City HVAC companies, for 913 and 816. Answers on a roof or in an attic. Maintenance can sit in a band. A replacement is a look.',
+    ogTitle: 'AI Receptionist for HVAC Companies in KC | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City HVAC. The phone is covered during a no-cool call or the first cold week. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City HVAC companies, for 913 and 816. Answers on a roof or in an attic. Maintenance can sit in a band. A replacement is a look.',
     ogImage: '/og/hvac.png',
     ogAlt: 'FrontDesk AI for Kansas City HVAC: the phone is answered while you are on the roof.',
   },

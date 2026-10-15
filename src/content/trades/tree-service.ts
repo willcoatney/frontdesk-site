@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'climbing',
   metadata: {
-    title: 'Answered while you are in the tree — FrontDesk AI for tree service',
+    title: 'AI Receptionist for Tree Service in KC | FrontDesk AI',
     description:
-      'A front office for Kansas City tree companies. The line answers while you are in a bucket or running a saw. Removals are booked as a look. Built and run from Olathe.',
-    ogTitle: 'Answered while you are in the tree',
+      'AI receptionist for Kansas City tree service companies. The line answers while you are in a bucket or running a saw. Removals are booked as a look.',
+    ogTitle: 'AI Receptionist for Tree Service in KC | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City tree service. The phone is covered while you are aloft. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City tree service companies. The line answers while you are in a bucket or running a saw. Removals are booked as a look.',
     ogImage: '/og/tree-service.png',
     ogAlt: 'FrontDesk AI for Kansas City tree service: the phone is answered while you are in the tree.',
   },

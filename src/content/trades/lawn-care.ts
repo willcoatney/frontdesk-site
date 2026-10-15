@@ -7,12 +7,12 @@ const trade: TradeConfig = {
   vehicle: 'trucks',
   keepDoing: 'mowing',
   metadata: {
-    title: 'Answered while you are on the mower — FrontDesk AI for lawn care',
+    title: 'AI Receptionist for Lawn Care in Kansas City | FrontDesk AI',
     description:
-      'A front office for Kansas City lawn companies. The line answers while you are on a mower. Mow routes can sit in a band. Landscape installs are a walk. Built in Olathe.',
-    ogTitle: 'Answered while you are on the mower',
+      'AI receptionist for Kansas City lawn care companies. The line answers while you mow. Mow routes can sit in a band. Landscape installs are a walk.',
+    ogTitle: 'AI Receptionist for Lawn Care in Kansas City | FrontDesk AI',
     ogDescription:
-      'FrontDesk AI for Kansas City lawn care. The route keeps filling while you are on a mower. Plans from $197 a month. Book a demo with Will in Olathe.',
+      'AI receptionist for Kansas City lawn care companies. The line answers while you mow. Mow routes can sit in a band. Landscape installs are a walk.',
     ogImage: '/og/lawn-care.png',
     ogAlt: 'FrontDesk AI for Kansas City lawn care: the phone is answered while you are on the mower.',
   },
