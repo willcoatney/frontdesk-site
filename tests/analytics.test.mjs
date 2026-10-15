@@ -7,10 +7,22 @@ import {
   linkLocation,
   measurementId,
   pendingScrollMarks,
+  resolveMeasurementId,
+  GA_MEASUREMENT_ID,
 } from '../src/lib/analytics-events.mjs'
 
 const pageUrl = 'https://frontdeskkc.com/pricing'
 const bookingUrl = 'https://calendar.app.google/p9muXBgfH2vFVhUd7'
+
+test('the default measurement id is used unless a valid override is set', () => {
+  assert.equal(GA_MEASUREMENT_ID, 'G-32PPW2Y56D')
+  assert.equal(resolveMeasurementId(undefined), 'G-32PPW2Y56D')
+  assert.equal(resolveMeasurementId(null), 'G-32PPW2Y56D')
+  assert.equal(resolveMeasurementId(''), 'G-32PPW2Y56D')
+  assert.equal(resolveMeasurementId('   '), 'G-32PPW2Y56D')
+  assert.equal(resolveMeasurementId('UA-123'), 'G-32PPW2Y56D')
+  assert.equal(resolveMeasurementId(' G-OVERRIDE1 '), 'G-OVERRIDE1')
+})
 
 test('measurement id is empty unless it is a GA4 id', () => {
   assert.equal(measurementId(undefined), '')

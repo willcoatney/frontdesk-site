@@ -1,5 +1,12 @@
 export const SCROLL_MARKS = [25, 50, 75, 90]
 
+export const GA_MEASUREMENT_ID = 'G-32PPW2Y56D'
+
+export function resolveMeasurementId(override) {
+  if (typeof override !== 'string' || override.trim() === '') return GA_MEASUREMENT_ID
+  return measurementId(override) || GA_MEASUREMENT_ID
+}
+
 const LANDMARKS = new Set(['HEADER', 'FOOTER', 'NAV'])
 
 export function measurementId(value) {

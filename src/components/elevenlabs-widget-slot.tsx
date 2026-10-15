@@ -7,10 +7,9 @@
  *
  * Do not put a fake chat or a fake voice button here.
  *
- * Analytics sends `chat_widget_open` on the first click inside `#elevenlabs-widget`
- * or on an `elevenlabs-convai` element (including its shadow tree). Clicks that
- * stay inside a cross-origin iframe do not reach the page; call `trackEvent`
- * from the embed in that case. See docs/analytics.md.
+ * Analytics listens for a click on #elevenlabs-widget or an elevenlabs-convai
+ * element and sends chat_widget_open. The hook stays generic so a later embed
+ * in this mount is picked up without a change here. See docs/analytics.md.
  */
 export function ElevenLabsWidgetSlot() {
   return (
