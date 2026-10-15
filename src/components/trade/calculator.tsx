@@ -1,19 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { CalculatorConfig } from '@/content/trades/types'
 import { BookDemo } from './links'
-import {
-  BOOK_RATE,
-  DEFAULT_INPUT,
-  PRESETS,
-  RECURRING_SHARE,
-  WEEKS_PER_MONTH,
-  estimateLeak,
-  formatCount,
-  formatMoney,
-  type LeakInput,
-} from './leak'
-import styles from './cleaning-v2.module.css'
+import { WEEKS_PER_MONTH, estimateLeak, formatCount, formatMoney, type LeakInput } from './leak'
+import styles from './trade.module.css'
 
 const DOTS = 16
 
@@ -102,7 +93,7 @@ function Field({
             step={step}
             value={value}
             onChange={(event) => onChange(clamp(event.target.valueAsNumber, min, max))}
-            className={`${styles.nums} w-16 bg-transparent text-right text-base font-semibold text-[#1C1915] outline-none`}
+            className={`${styles.nums} w-24 bg-transparent text-right text-base font-semibold text-[#1C1915] outline-none`}
           />
           {suffix ? <span className="text-sm text-[#5C564E]">{suffix}</span> : null}
         </div>
@@ -131,24 +122,24 @@ function ResultCard({
   recovered,
   perDay,
   jobs,
-  recurring,
+  repeatCustomers,
   firstJobRevenue,
-  recurringRevenue,
+  repeatRevenue,
+  repeatNoun,
 }: {
   lost: string
   recovered: string
   perDay: string
   jobs: string
-  recurring: string
+  repeatCustomers: string | null
   firstJobRevenue: string
-  recurringRevenue: string
+  repeatRevenue: string | null
+  repeatNoun: string | null
 }) {
   return (
     <div className="overflow-hidden rounded-2xl bg-[#1B4332] text-[#F6F3EC] shadow-[0_18px_40px_-28px_rgba(27,67,50,0.85)]">
       <div className="px-5 py-5 sm:px-6">
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-[#D7E6DC] uppercase">
-          Illustrative
-        </p>
+        <p className="text-[11px] font-semibold tracking-[0.16em] text-[#D7E6DC] uppercase">Illustrative</p>
         <p className={`${styles.display} mt-2 text-xl`}>Left on the table</p>
         <p className={`${styles.nums} mt-1 text-5xl font-semibold tracking-tight`}>{lost}</p>
         <p className="mt-1 text-sm text-[#D7E6DC]">this month · about {perDay} a day</p>
@@ -157,30 +148,38 @@ function ResultCard({
         <p className={`${styles.display} text-xl`}>Recovered if those contacts are answered</p>
         <p className={`${styles.nums} mt-1 text-3xl font-semibold tracking-tight`}>{recovered}</p>
         <p className="mt-2 text-sm leading-relaxed text-[#D7E6DC]">
-          About {jobs} first jobs ({firstJobRevenue}) and {recurring} new recurring clients (
-          {recurringRevenue} in the first month).
+          {repeatNoun && repeatCustomers && repeatRevenue
+            ? `About ${jobs} first jobs (${firstJobRevenue}) and ${repeatCustomers} ${repeatNoun} (${repeatRevenue} in the first month).`
+            : `About ${jobs} booked jobs (${firstJobRevenue}). Later work from the same customer is not included.`}
         </p>
       </div>
     </div>
   )
 }
 
-export function LeakCalculator() {
+export function LeakCalculator({ config }: { config: CalculatorConfig }) {
   const reduced = usePrefersReducedMotion()
-  const [input, setInput] = useState<LeakInput>(DEFAULT_INPUT)
+  const starting = config.presets.find((preset) => preset.id === config.defaultPresetId) ?? config.presets[0]
+  const [input, setInput] = useState<LeakInput>({
+    callsPerWeek: starting.callsPerWeek,
+    missedPercent: starting.missedPercent,
+    averageJob: starting.averageJob,
+    repeatMonthly: starting.repeatMonthly,
+  })
   const [showMath, setShowMath] = useState(false)
-  const result = useMemo(() => estimateLeak(input), [input])
+  const rates = { bookRate: config.bookRate, repeatShare: config.repeat?.share ?? 0 }
+  const result = useMemo(() => estimateLeak(input, rates), [input, rates.bookRate, rates.repeatShare])
   const animatedLost = useAnimatedNumber(result.monthlyLost, reduced)
   const lost = formatMoney(reduced ? result.monthlyLost : animatedLost)
   const recovered = formatMoney(result.monthlyRecovered)
   const missedDots = Math.round((input.missedPercent / 100) * DOTS)
 
-  const activePreset = PRESETS.find(
+  const activePreset = config.presets.find(
     (preset) =>
       preset.callsPerWeek === input.callsPerWeek &&
       preset.missedPercent === input.missedPercent &&
       preset.averageJob === input.averageJob &&
-      preset.recurringMonthly === input.recurringMonthly,
+      preset.repeatMonthly === input.repeatMonthly,
   )?.id
 
   const patch = (partial: Partial<LeakInput>) => setInput((current) => ({ ...current, ...partial }))
@@ -191,9 +190,10 @@ export function LeakCalculator() {
       recovered={recovered}
       perDay={formatMoney(result.perDay)}
       jobs={formatCount(result.bookedJobs)}
-      recurring={formatCount(result.recurringClients)}
+      repeatCustomers={config.repeat ? formatCount(result.repeatCustomers) : null}
       firstJobRevenue={formatMoney(result.firstJobRevenue)}
-      recurringRevenue={formatMoney(result.recurringRevenue)}
+      repeatRevenue={config.repeat ? formatMoney(result.repeatRevenue) : null}
+      repeatNoun={config.repeat?.noun ?? null}
     />
   )
 
@@ -212,7 +212,7 @@ export function LeakCalculator() {
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-6">
         <div className={`${styles.card} p-4 sm:p-6`}>
           <div role="radiogroup" aria-label="Example weeks" className="flex flex-wrap gap-2">
-            {PRESETS.map((preset) => {
+            {config.presets.map((preset) => {
               const selected = activePreset === preset.id
               return (
                 <button
@@ -225,13 +225,11 @@ export function LeakCalculator() {
                       callsPerWeek: preset.callsPerWeek,
                       missedPercent: preset.missedPercent,
                       averageJob: preset.averageJob,
-                      recurringMonthly: preset.recurringMonthly,
+                      repeatMonthly: preset.repeatMonthly,
                     })
                   }
                   className={`min-h-11 rounded-full px-3.5 text-sm font-semibold transition-colors ${
-                    selected
-                      ? 'bg-[#1B4332] text-white'
-                      : 'bg-[#F3EFE7] text-[#1C1915] hover:bg-[#E7E0D4]'
+                    selected ? 'bg-[#1B4332] text-white' : 'bg-[#F3EFE7] text-[#1C1915] hover:bg-[#E7E0D4]'
                   }`}
                 >
                   {preset.label}
@@ -239,28 +237,26 @@ export function LeakCalculator() {
               )
             })}
           </div>
-          <p className="mt-3 text-sm text-[#5C564E]">
-            Start from a week that looks like yours, then move the numbers.
-          </p>
+          <p className="mt-3 text-sm text-[#5C564E]">Start from a week that looks like yours, then move the numbers.</p>
 
           <div className="mt-6 space-y-6">
             <Field
               id="calls-per-week"
               label="Calls and messages a week"
-              hint="Phone calls, plus website chats and texts."
-              min={4}
-              max={80}
-              step={1}
+              hint={config.calls.hint}
+              min={config.calls.min}
+              max={config.calls.max}
+              step={config.calls.step}
               value={input.callsPerWeek}
               onChange={(callsPerWeek) => patch({ callsPerWeek })}
             />
             <Field
               id="missed-percent"
               label="Missed or after hours"
-              hint="Voicemail, or anything that comes in after you have quit for the day. For context, 62% of calls to small businesses go unanswered."
-              min={5}
-              max={80}
-              step={1}
+              hint={config.missed.hint}
+              min={config.missed.min}
+              max={config.missed.max}
+              step={config.missed.step}
               value={input.missedPercent}
               suffix="%"
               onChange={(missedPercent) => patch({ missedPercent })}
@@ -287,26 +283,28 @@ export function LeakCalculator() {
             </div>
             <Field
               id="average-job"
-              label="Average job value"
-              hint="A typical first clean or one-time job, not the whole route."
-              min={80}
-              max={600}
-              step={5}
+              label={config.job.label}
+              hint={config.job.hint}
+              min={config.job.min}
+              max={config.job.max}
+              step={config.job.step}
               value={input.averageJob}
               prefix="$"
               onChange={(averageJob) => patch({ averageJob })}
             />
-            <Field
-              id="recurring-value"
-              label="Recurring client, per month"
-              hint="What one client who stays is worth each month. A $150 biweekly visit is about $325."
-              min={100}
-              max={2000}
-              step={10}
-              value={input.recurringMonthly}
-              prefix="$"
-              onChange={(recurringMonthly) => patch({ recurringMonthly })}
-            />
+            {config.repeat ? (
+              <Field
+                id="repeat-value"
+                label={config.repeat.label}
+                hint={config.repeat.hint}
+                min={config.repeat.min}
+                max={config.repeat.max}
+                step={config.repeat.step}
+                value={input.repeatMonthly}
+                prefix="$"
+                onChange={(repeatMonthly) => patch({ repeatMonthly })}
+              />
+            ) : null}
           </div>
 
           <div className="mt-6 border-t border-[#E7E0D4] pt-4">
@@ -322,18 +320,27 @@ export function LeakCalculator() {
             {showMath ? (
               <div id="leak-math" className="mt-3 text-sm leading-relaxed text-[#3C3832]">
                 <p>
-                  Contacts a month = calls and messages a week × {WEEKS_PER_MONTH}. Missed contacts = that
-                  total × your missed percent.
+                  Contacts a month = calls and messages a week × {WEEKS_PER_MONTH}. Missed contacts = that total ×
+                  your missed percent.
                 </p>
                 <p className="mt-2">
-                  Jobs = missed contacts × {BOOK_RATE.toFixed(2)} (1 in 3). Recurring clients = those jobs ×{' '}
-                  {RECURRING_SHARE.toFixed(2)} (1 in 4).
+                  Jobs = missed contacts × {config.bookRateLabel}. That booking rate is an assumption, not your close
+                  rate.
                 </p>
-                <p className="mt-2">
-                  Monthly revenue lost = jobs × average job value, plus recurring clients × monthly recurring
-                  value. Monthly revenue recovered uses the same figure, on the assumption those contacts get
-                  an answer and book at that rate.
-                </p>
+                {config.repeat ? (
+                  <p className="mt-2">
+                    {config.repeat.noun} = those jobs × {config.repeat.shareLabel}. Monthly revenue lost = jobs ×{' '}
+                    {config.job.label.toLowerCase()}, plus {config.repeat.noun} × the monthly value. Monthly revenue
+                    recovered uses the same figure, on the assumption those contacts get an answer and book at that
+                    rate.
+                  </p>
+                ) : (
+                  <p className="mt-2">
+                    Monthly revenue lost = jobs × {config.job.label.toLowerCase()}. Later work from the same customer
+                    is not included. Monthly revenue recovered uses the same figure, on the assumption those contacts
+                    get an answer and book at that rate.
+                  </p>
+                )}
               </div>
             ) : null}
           </div>
@@ -344,8 +351,8 @@ export function LeakCalculator() {
             {card}
             <BookDemo className="w-full">Book a Demo</BookDemo>
             <p className="text-sm leading-relaxed text-[#5C564E]">
-              Illustrative only. Not a promise, and not a client result. Your close rate will differ. On the
-              demo we will use a real week from your phone.
+              Illustrative only. Not a promise, and not a client result. Your close rate will differ. On the demo we
+              will use a real week from your phone.
             </p>
           </div>
         </div>
@@ -355,8 +362,8 @@ export function LeakCalculator() {
         {card}
         <BookDemo className="w-full">Book a Demo</BookDemo>
         <p className="text-sm leading-relaxed text-[#5C564E]">
-          Illustrative only. Not a promise, and not a client result. Your close rate will differ. On the demo
-          we will use a real week from your phone.
+          Illustrative only. Not a promise, and not a client result. Your close rate will differ. On the demo we will
+          use a real week from your phone.
         </p>
       </div>
     </div>

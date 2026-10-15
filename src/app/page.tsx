@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PLANS, PRICING_NOTE } from '@/content/pricing'
+import { tradeNav } from '@/content/trades/nav'
 import {
   Phone,
   MessageSquare,
@@ -324,20 +326,23 @@ export default function FrontDeskAIPage() {
             {[
               {
                 stat: '62%',
-                label: 'of calls to small businesses go unanswered',
-                context: "That's more than half your inbound leads going straight to voicemail — or worse, a competitor.",
+                label: 'of calls in a 2016 study of 85 small businesses did not reach a live person',
+                context:
+                  '411 Locals monitored those businesses for 30 days: about 38% were answered live, about 38% went to voicemail, and about 24% got no response. One vendor study, not a current census.',
                 icon: '📞',
               },
               {
-                stat: '85%',
-                label: "of callers won't try again if they can't reach you",
-                context: "One missed call doesn't just lose a call. It loses the patient. Permanently.",
+                stat: 'Next',
+                label: 'company often gets the caller when nobody picks up',
+                context:
+                  'People who need an answer today call someone else. The often-repeated “85% won’t call back” line has no study we can cite, so it is not a number on this site.',
                 icon: '👋',
               },
               {
                 stat: '$200+',
-                label: 'average revenue lost per missed call',
-                context: "For a busy practice missing 5 calls a day, that's $1,000+ walking out the door. Daily.",
+                label: 'illustrative value people use for one missed call',
+                context:
+                  'Illustrative, not a measured average. What a missed call is worth depends on the work. A busy week of unanswered calls adds up faster than one visit.',
                 icon: '💸',
               },
             ].map((item) => (
@@ -371,7 +376,7 @@ export default function FrontDeskAIPage() {
                   <CheckRow>Missed callers automatically texted within 60 seconds</CheckRow>
                   <CheckRow>Reminders sent automatically 24h and 2h before every appointment</CheckRow>
                   <CheckRow>Full dashboard showing every lead, every conversation, every booking</CheckRow>
-                  <CheckRow>Fraction of the cost of a single part-time receptionist</CheckRow>
+                  <CheckRow>From $197 a month, against $2,500–$4,000 for a receptionist before benefits</CheckRow>
                 </ul>
               </div>
             </div>
@@ -758,13 +763,13 @@ export default function FrontDeskAIPage() {
                 {[
                   ['Available 24/7', '✅', '❌', '⚠️ Partial', '❌'],
                   ['Answers in <2 rings', '✅', '❌ Hold times', '❌', '❌'],
-                  ['Books appointments', '✅', '✅', '⚠️ Complex setup', '❌'],
+                  ['Quotes and books', 'Pro & Growth', '✅', '⚠️ Complex setup', '❌'],
                   ['Automatic SMS follow-up', '✅', '❌', '✅', '❌'],
-                  ['Unified conversations dashboard', '✅', '❌', '⚠️ DIY', '❌'],
-                  ['Opportunity pipeline', '✅', '❌', '⚠️ DIY', '❌'],
+                  ['Custom dashboard', 'Growth', '❌', '⚠️ DIY', '❌'],
+                  ['CRM pipeline and reviews', 'Pro & Growth', '❌', '⚠️ DIY', '❌'],
                   ['Local KC support', '✅', 'Varies', '❌', 'N/A'],
                   ['Setup time', '~1 week', '2–4 weeks', 'Months of DIY', 'N/A'],
-                  ['Monthly cost', '$500–1,500', '$2,500–4,000', '$297+ (self-managed)', '$0 + lost leads'],
+                  ['Monthly cost', '$197–$797+', '$2,500–4,000', '$297+ (self-managed)', '$0 + lost leads'],
                 ].map(([feature, ...vals]) => (
                   <tr key={feature} className="border-b border-white/5 hover:bg-white/[0.02]">
                     <td className="p-5 text-white/70 font-medium">{feature}</td>
@@ -797,65 +802,33 @@ export default function FrontDeskAIPage() {
 
       {/* ── PRICING ── */}
       <section id="pricing" className="py-28 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-6xl mx-auto text-center">
           <span className="text-indigo-400 font-semibold text-sm uppercase tracking-widest">Pricing</span>
           <h2 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Simple. Transparent. Local.</h2>
           <p className="text-white/60 text-xl max-w-xl mx-auto mb-14">
-            No per-user fees. No per-minute charges. No surprise invoices. One monthly rate for everything.
+            No per-user fees. No per-minute charges. Three plans. Setup is a one-time fee on the plan you pick.
           </p>
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {[
-              {
-                name: 'Starter',
-                price: '$597',
-                period: '/month',
-                desc: 'Perfect for solo practitioners and small service businesses.',
-                bullets: [
-                  'AI voice receptionist (up to 300 calls/mo)',
-                  'Automated SMS follow-up',
-                  'Smart calendar with booking',
-                  'Conversations inbox',
-                  'Client contacts database',
-                  '1 location',
-                  '30-day onboarding support',
-                ],
-                cta: 'Book a Demo',
-                highlight: false,
-              },
-              {
-                name: 'Growth',
-                price: '$1,197',
-                period: '/month',
-                desc: 'For busy practices that need higher volume and full pipeline management.',
-                bullets: [
-                  'Everything in Starter',
-                  'Unlimited calls',
-                  'Opportunity pipeline + reporting',
-                  'Multi-provider calendar',
-                  'Re-engagement SMS campaigns',
-                  'Monthly strategy call with us',
-                  'Priority support — direct line',
-                ],
-                cta: 'Book a Demo',
-                highlight: true,
-              },
-            ].map((plan) => (
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {PLANS.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl border p-8 text-left ${plan.highlight ? 'border-indigo-500/50 bg-gradient-to-br from-indigo-950/60 to-indigo-950/20' : 'border-white/10 bg-white/5'}`}
+                className={`rounded-2xl border p-8 text-left flex flex-col ${plan.highlight ? 'border-indigo-500/50 bg-gradient-to-br from-indigo-950/60 to-indigo-950/20' : 'border-white/10 bg-white/5'}`}
               >
-                {plan.highlight && (
+                {plan.badge ? (
                   <div className="mb-4">
                     <span className="text-xs font-bold uppercase tracking-widest text-indigo-300 bg-indigo-600/20 border border-indigo-500/30 px-3 py-1 rounded-full">
-                      Most Popular
+                      {plan.badge}
                     </span>
                   </div>
+                ) : (
+                  <div className="mb-4 h-[26px]" aria-hidden />
                 )}
                 <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className="text-4xl font-black">{plan.price}</span>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-black">{plan.priceLabel}</span>
                   <span className="text-white/40">{plan.period}</span>
                 </div>
+                <p className="text-white/45 text-sm mb-3">One-time setup {plan.setupLabel}</p>
                 <p className="text-white/55 text-sm mb-6">{plan.desc}</p>
                 <ul className="space-y-2.5 mb-8">
                   {plan.bullets.map((b) => (
@@ -869,15 +842,15 @@ export default function FrontDeskAIPage() {
                   href={BOOK_HREF}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`block text-center font-bold py-3.5 rounded-xl transition-colors ${plan.highlight ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'border border-white/20 hover:bg-white/10 text-white'}`}
+                  className={`mt-auto block text-center font-bold py-3.5 rounded-xl transition-colors ${plan.highlight ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'border border-white/20 hover:bg-white/10 text-white'}`}
                 >
-                  {plan.cta}
+                  Book a Demo
                 </a>
               </div>
             ))}
           </div>
           <p className="mt-8 text-white/35 text-sm">
-            All plans include a one-time setup fee of $497. Month-to-month after launch. Cancel anytime.
+            {PRICING_NOTE}
           </p>
         </div>
       </section>
@@ -955,15 +928,17 @@ export default function FrontDeskAIPage() {
           <p className="text-white/30 text-sm">
             © {new Date().getFullYear()} FrontDesk KC. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-sm text-white/40">
-            <Link href="/cleaning" className="hover:text-white/70 transition-colors">
-              Cleaning companies
-            </Link>
+          <nav aria-label="Trades" className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-white/40">
+            {tradeNav.map((trade) => (
+              <Link key={trade.slug} href={`/${trade.slug}`} className="hover:text-white/70 transition-colors">
+                {trade.label}
+              </Link>
+            ))}
             <a href={PHONE_HREF} className="hover:text-white/70 transition-colors flex items-center gap-1.5">
               <Phone className="w-4 h-4" />
               {PHONE}
             </a>
-          </div>
+          </nav>
         </div>
       </footer>
 

@@ -1,89 +1,58 @@
 /** Illustrative model for the revenue-leak calculator. Not a forecast. */
 
 export const WEEKS_PER_MONTH = 4.33
-/** Share of missed contacts assumed to book if someone had answered. */
-export const BOOK_RATE = 1 / 3
-/** Share of those bookings assumed to become a recurring client. */
-export const RECURRING_SHARE = 1 / 4
 
 export type LeakInput = {
   callsPerWeek: number
   missedPercent: number
   averageJob: number
-  recurringMonthly: number
+  repeatMonthly: number
+}
+
+export type LeakRates = {
+  bookRate: number
+  repeatShare: number
 }
 
 export type LeakResult = {
   contactsPerMonth: number
   missedContacts: number
   bookedJobs: number
-  recurringClients: number
+  repeatCustomers: number
   firstJobRevenue: number
-  recurringRevenue: number
+  repeatRevenue: number
   monthlyLost: number
   monthlyRecovered: number
   perDay: number
-}
-
-export const PRESETS = [
-  {
-    id: 'solo',
-    label: 'Solo crew',
-    callsPerWeek: 12,
-    missedPercent: 50,
-    averageJob: 160,
-    recurringMonthly: 280,
-  },
-  {
-    id: 'busy',
-    label: 'Busy residential',
-    callsPerWeek: 24,
-    missedPercent: 40,
-    averageJob: 185,
-    recurringMonthly: 320,
-  },
-  {
-    id: 'mixed',
-    label: 'Homes and offices',
-    callsPerWeek: 40,
-    missedPercent: 35,
-    averageJob: 240,
-    recurringMonthly: 520,
-  },
-] as const
-
-export const DEFAULT_INPUT: LeakInput = {
-  callsPerWeek: PRESETS[1].callsPerWeek,
-  missedPercent: PRESETS[1].missedPercent,
-  averageJob: PRESETS[1].averageJob,
-  recurringMonthly: PRESETS[1].recurringMonthly,
 }
 
 function finite(value: number) {
   return Number.isFinite(value) ? value : 0
 }
 
-export function estimateLeak(input: LeakInput): LeakResult {
+export function estimateLeak(input: LeakInput, rates: LeakRates): LeakResult {
   const callsPerWeek = Math.max(0, finite(input.callsPerWeek))
   const missedPercent = Math.min(100, Math.max(0, finite(input.missedPercent)))
   const averageJob = Math.max(0, finite(input.averageJob))
-  const recurringMonthly = Math.max(0, finite(input.recurringMonthly))
+  const repeatMonthly = Math.max(0, finite(input.repeatMonthly))
+  const bookRate = Math.max(0, finite(rates.bookRate))
+  const repeatShare = Math.max(0, finite(rates.repeatShare))
 
   const contactsPerMonth = callsPerWeek * WEEKS_PER_MONTH
   const missedContacts = contactsPerMonth * (missedPercent / 100)
-  const bookedJobs = missedContacts * BOOK_RATE
-  const recurringClients = bookedJobs * RECURRING_SHARE
+  const bookedJobs = missedContacts * bookRate
+  const repeatCustomers = bookedJobs * repeatShare
   const firstJobRevenue = Math.round(bookedJobs * averageJob)
-  const recurringRevenue = Math.round(recurringClients * recurringMonthly)
-  const monthlyLost = firstJobRevenue + recurringRevenue
+  const repeatRevenue = Math.round(repeatCustomers * repeatMonthly)
+  const monthlyLost = firstJobRevenue + repeatRevenue
 
   return {
     contactsPerMonth,
     missedContacts,
     bookedJobs,
-    recurringClients,
+    repeatCustomers,
     firstJobRevenue,
-    recurringRevenue,
+    repeatRevenue,
     monthlyLost,
     monthlyRecovered: monthlyLost,
     perDay: Math.round(monthlyLost / 30),

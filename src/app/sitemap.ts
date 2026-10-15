@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { tradeNav } from '@/content/trades/nav'
 
 export const dynamic = 'force-static'
 
@@ -14,11 +15,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 1,
     },
-    {
-      url: `${SITE}/cleaning`,
+    ...tradeNav.map((trade) => ({
+      url: `${SITE}/${trade.slug}`,
       lastModified,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
+      changeFrequency: 'weekly' as const,
+      priority: trade.slug === 'cleaning' ? 0.9 : 0.8,
+    })),
   ]
 }
