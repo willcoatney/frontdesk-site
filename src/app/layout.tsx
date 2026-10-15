@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { HOME_DESCRIPTION, HOME_OG_ALT, HOME_TITLE } from '@/content/home'
 import './globals.css'
 
 const inter = Inter({
@@ -9,12 +10,10 @@ const inter = Inter({
 })
 
 const SITE = 'https://frontdeskkc.com'
-const TITLE = 'FrontDesk AI — AI Receptionist for Kansas City Service Businesses'
-const DESCRIPTION =
-  'FrontDesk AI answers every call, books appointments, texts clients, and tracks every lead. Built and supported locally in Kansas City by FrontDesk KC.'
+const TITLE = HOME_TITLE
+const DESCRIPTION = HOME_DESCRIPTION
 const OG_IMAGE = 'https://frontdeskkc.com/og/home.png'
-const OG_ALT =
-  'FrontDesk AI: your front desk, working 24/7 for Kansas City service businesses.'
+const OG_ALT = HOME_OG_ALT
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
