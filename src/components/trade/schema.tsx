@@ -166,3 +166,78 @@ export function TradeSchema({ trade }: { trade: TradeConfig }) {
     />
   )
 }
+
+const BUSINESS_ADDRESS = {
+  '@type': 'PostalAddress',
+  addressLocality: 'Olathe',
+  addressRegion: 'KS',
+  addressCountry: 'US',
+}
+
+const BUSINESS_AREA = {
+  '@type': 'AdministrativeArea',
+  name: 'Kansas City metropolitan area',
+}
+
+export function HomeSchema({
+  description,
+  faqs,
+}: {
+  description: string
+  faqs: { q: string; a: string }[]
+}) {
+  const url = `${SITE}/`
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${SITE}/#organization`,
+        name: 'FrontDesk KC',
+        alternateName: 'FrontDesk AI',
+        url,
+        telephone: '+1-913-717-7841',
+        image: `${SITE}/og/home.png`,
+        founder: {
+          '@type': 'Person',
+          name: 'Will Coatney',
+        },
+        address: BUSINESS_ADDRESS,
+        areaServed: BUSINESS_AREA,
+      },
+      {
+        '@type': 'LocalBusiness',
+        '@id': `${SITE}/#localbusiness`,
+        name: 'FrontDesk KC',
+        alternateName: 'FrontDesk AI',
+        url,
+        telephone: '+1-913-717-7841',
+        image: `${SITE}/og/home.png`,
+        priceRange: '$197-$797+',
+        description,
+        parentOrganization: { '@id': `${SITE}/#organization` },
+        founder: {
+          '@type': 'Person',
+          name: 'Will Coatney',
+        },
+        address: BUSINESS_ADDRESS,
+        areaServed: BUSINESS_AREA,
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${url}#faq`,
+        url,
+        mainEntity: faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.a,
+          },
+        })),
+      },
+    ],
+  }
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(graph) }} />
+}
