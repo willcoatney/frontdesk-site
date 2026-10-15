@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { Check } from 'lucide-react'
+import { Calendar, Check } from 'lucide-react'
 import { display } from '@/components/display-font'
 import { ElevenLabsWidgetSlot } from '@/components/elevenlabs-widget-slot'
 import { PaperHeading } from '@/components/paper/shell'
 import { LeakCalculator } from '@/components/trade/calculator'
 import { BeforeAfter } from '@/components/trade/compare'
-import { BOOK_HREF, PHONE, PHONE_HREF } from '@/components/trade/constants'
+import { PHONE, PHONE_HREF } from '@/components/trade/constants'
+import { BOOKING_URL } from '@/content/booking'
 import { ProductDemos } from '@/components/trade/demos'
 import { SiteFooter } from '@/components/trade/footer'
 import { FaqList } from '@/components/trade/faq'
@@ -49,6 +50,14 @@ export const metadata = pageMeta({
 
 const focus =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]'
+
+// This CTA uses the new demo number directly so it does not depend on the sitewide phone constant.
+const DEMO_CALL = '(913) 349-8507'
+const DEMO_CALL_HREF = 'tel:+19133498507'
+
+function bookingLinkProps(url: string) {
+  return /^https?:\/\//i.test(url) ? { target: '_blank' as const, rel: 'noopener noreferrer' } : {}
+}
 
 function SeePricing({ className = '' }: { className?: string }) {
   return (
@@ -124,19 +133,26 @@ export default function Page() {
                 The website, the phone answering, and the follow-up, handled for one monthly price. Residential or
                 commercial. Will Coatney builds it from Olathe, and he is in Kansas City when you need a person.
               </p>
-              <div id="top-cta" className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <BookDemo className="w-full sm:w-auto">Book a 15-minute demo</BookDemo>
+              <div id="top-cta" className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <a
+                  href={BOOKING_URL}
+                  {...bookingLinkProps(BOOKING_URL)}
+                  className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] px-5 text-center text-base font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_12px_28px_-16px_rgba(27,67,50,0.95)] transition-colors hover:bg-[#245C45] sm:w-auto ${focus}`}
+                >
+                  <Calendar className="size-4 shrink-0" aria-hidden />
+                  Book a 15-minute demo
+                </a>
+                <a
+                  href={DEMO_CALL_HREF}
+                  className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#DDD5C8] bg-[#FBF8F3] px-5 text-center text-base font-semibold text-[#1C1915] transition-colors hover:border-[#1B4332] sm:w-auto ${focus}`}
+                >
+                  Or call {DEMO_CALL}
+                </a>
                 <SeePricing className="w-full sm:w-auto" />
               </div>
               <p className="mt-4 text-sm text-[#5C564E]">
                 15 minutes <span aria-hidden>·</span> You keep your number <span aria-hidden>·</span> About a week to go
                 live
-              </p>
-              <p className="mt-2 text-sm text-[#5C564E]">
-                Prefer the phone?{' '}
-                <a href={PHONE_HREF} className="font-semibold text-[#1B4332] underline underline-offset-4">
-                  Call {PHONE}
-                </a>
               </p>
             </div>
 
@@ -448,7 +464,7 @@ export default function Page() {
         </section>
 
         <section id="final-cta" className="scroll-mt-24 px-4 pb-16 sm:px-6">
-          <div className="mx-auto max-w-6xl rounded-3xl bg-[#1B4332] px-5 py-10 text-[#F6F3EC] sm:px-10 sm:py-14">
+          <div id="book-demo" className="mx-auto max-w-6xl rounded-3xl bg-[#1B4332] px-5 py-10 text-[#F6F3EC] sm:px-10 sm:py-14">
             <h2 className={`${styles.display} text-[2rem] leading-[1.1] font-medium tracking-[-0.03em] sm:text-5xl`}>
               Fifteen minutes. Your number. Your week.
             </h2>
@@ -458,18 +474,17 @@ export default function Page() {
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <a
-                href={BOOK_HREF}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#F6F3EC] px-5 text-base font-semibold text-[#1B4332] hover:bg-white"
+                href={BOOKING_URL}
+                {...bookingLinkProps(BOOKING_URL)}
+                className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#F6F3EC] px-5 text-center text-base font-semibold text-[#1B4332] hover:bg-white sm:w-auto ${focus}`}
               >
                 Book a 15-minute demo
               </a>
               <a
-                href={PHONE_HREF}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-5 text-base font-semibold text-white hover:bg-white/10"
+                href={DEMO_CALL_HREF}
+                className={`inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/30 px-5 text-center text-base font-semibold text-white hover:bg-white/10 sm:w-auto ${focus}`}
               >
-                Call {PHONE}
+                Or call {DEMO_CALL}
               </a>
             </div>
             <p className="mt-5 text-sm text-[#D7E6DC]">
