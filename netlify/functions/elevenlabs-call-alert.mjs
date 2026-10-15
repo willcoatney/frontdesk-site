@@ -34,6 +34,21 @@ const val = (r, k) => {
   return v === undefined || v === null || v === '' ? null : v
 }
 
+// Last spoken agent turn. Tool-only turns often store null/None and are skipped.
+const lastAgentMessage = (transcript) => {
+  if (!Array.isArray(transcript)) return null
+  for (let i = transcript.length - 1; i >= 0; i--) {
+    const turn = transcript[i]
+    if (!turn || turn.role !== 'agent') continue
+    const msg = turn.message
+    if (typeof msg !== 'string' || msg === 'None') continue
+    const text = msg.trim()
+    if (!text || text === 'None') continue
+    return text.slice(0, 300)
+  }
+  return null
+}
+
 export function buildAlert(payload) {
   const d = payload.data || {}
   const a = d.analysis || {}
@@ -47,17 +62,21 @@ export function buildAlert(payload) {
     interest: val(r, 'interest'),
     preferred_time: val(r, 'preferred_time'),
     is_lead: val(r, 'is_lead'),
+    lead_temperature: val(r, 'lead_temperature'),
   }
   const duration = d.metadata?.call_duration_secs ?? null
   const summary = a.transcript_summary || null
+  const closing = lastAgentMessage(d.transcript)
   const lines = [
     `New FrontDesk call${lead.is_lead === false || lead.is_lead === 'false' ? ' (not flagged as a lead)' : ' lead'}`,
+    lead.lead_temperature ? `Lead temperature: ${lead.lead_temperature}` : null,
     `Caller: ${lead.caller_name || 'unknown'}${lead.business_name ? ` (${lead.business_name}` + (lead.business_type ? `, ${lead.business_type})` : ')') : ''}`,
     `Callback: ${lead.callback_number || 'not given'}${lead.email ? ` | ${lead.email}` : ''}`,
     lead.interest ? `Interest: ${lead.interest}` : null,
     lead.preferred_time ? `Preferred time: ${lead.preferred_time}` : null,
     duration != null ? `Duration: ${duration}s` : null,
-    summary ? `Summary: ${summary}` : null,
+    closing ? `Closing line: ${closing}` : null,
+    summary ? `Auto-summary (may be inaccurate on booking status): ${summary}` : null,
     `Conversation: ${d.conversation_id || 'unknown'}`,
   ].filter(Boolean)
   return { source: 'elevenlabs', conversation_id: d.conversation_id || null, ...lead, call_duration_secs: duration, summary, text: lines.join('\n') }
