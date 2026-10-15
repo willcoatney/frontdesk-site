@@ -1,6 +1,6 @@
 import { PLANS } from '@/content/pricing'
 import type { TradeConfig } from '@/content/trades/types'
-import { SITE } from './constants'
+import { PHONE_E164, SITE } from './constants'
 
 function jsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, '\\u003c')
@@ -50,7 +50,7 @@ export function PricingOffers({ path }: { path: string }) {
     provider: {
       '@type': 'LocalBusiness',
       name: 'FrontDesk KC',
-      telephone: '+1-913-717-7841',
+      telephone: PHONE_E164,
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Olathe',
@@ -121,7 +121,7 @@ export function TradeSchema({ trade }: { trade: TradeConfig }) {
         provider: {
           '@type': 'LocalBusiness',
           name: 'FrontDesk KC',
-          telephone: '+1-913-717-7841',
+          telephone: PHONE_E164,
           image: `${SITE}${trade.metadata.ogImage}`,
           address: {
             '@type': 'PostalAddress',
@@ -196,7 +196,7 @@ export function HomeSchema({
         name: 'FrontDesk KC',
         alternateName: 'FrontDesk AI',
         url,
-        telephone: '+1-913-717-7841',
+        telephone: PHONE_E164,
         image: `${SITE}/og/home.png`,
         founder: {
           '@type': 'Person',
@@ -211,7 +211,7 @@ export function HomeSchema({
         name: 'FrontDesk KC',
         alternateName: 'FrontDesk AI',
         url,
-        telephone: '+1-913-717-7841',
+        telephone: PHONE_E164,
         image: `${SITE}/og/home.png`,
         priceRange: '$197-$797+',
         description,

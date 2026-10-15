@@ -70,7 +70,7 @@ def render(slug: str, kicker: str, headline: str) -> None:
         y += 82
 
     draw.text((72, y + 18), "Built and run from Olathe, for the Kansas City metro.", font=sub_font, fill=MUTED)
-    draw.text((72, H - 78), "frontdeskkc.com   ·   (913) 717-7841", font=foot_font, fill=CREAM)
+    draw.text((72, H - 78), "frontdeskkc.com   ·   (913) 349-8507", font=foot_font, fill=CREAM)
     image.save(OUT / f"{slug}.png", "PNG")
 
 
