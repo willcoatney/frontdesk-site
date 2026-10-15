@@ -299,6 +299,9 @@ export default function Page() {
                 </li>
               ))}
             </ul>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#3C3832]">
+              Nothing says unprofessional like a Gmail address listed as a business email.
+            </p>
             <p className="mt-4 text-sm leading-relaxed text-[#5C564E]">{PRICING_NOTE}</p>
           </div>
         </section>
