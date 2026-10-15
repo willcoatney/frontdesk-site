@@ -118,11 +118,35 @@ export default function Page() {
               <h1
                 className={`${styles.display} mt-3 text-[2.15rem] leading-[1.05] font-medium tracking-[-0.03em] text-[#1C1915] sm:text-5xl lg:text-[3.35rem]`}
               >
-                Never miss a call or a lead.
+                An AI receptionist for Kansas City businesses.
               </h1>
+              <p
+                className={`${styles.display} mt-2 text-[1.75rem] leading-[1.15] font-medium tracking-[-0.03em] text-[#1C1915] sm:text-4xl`}
+              >
+                Never miss a call or a lead.
+              </p>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-[#3C3832] sm:text-lg">
-                The website, the phone answering, and the follow-up, handled for one monthly price. Residential or
-                commercial. Will Coatney builds it from Olathe, and he is in Kansas City when you need a person.
+                An AI receptionist for Kansas City service businesses. The{' '}
+                <Link href="/websites" className="font-semibold text-[#1B4332] underline underline-offset-4">
+                  website
+                </Link>
+                , the phone answering, and the follow-up, handled for{' '}
+                <Link href="/pricing" className="font-semibold text-[#1B4332] underline underline-offset-4">
+                  one monthly price
+                </Link>
+                . Residential or commercial. Will Coatney builds it from Olathe, and he is in Kansas City when you need a
+                person. A{' '}
+                <Link href="/missed-call-text-back" className="font-semibold text-[#1B4332] underline underline-offset-4">
+                  missed call can still get a text back
+                </Link>
+                . An{' '}
+                <Link
+                  href="/ai-receptionist-vs-answering-service"
+                  className="font-semibold text-[#1B4332] underline underline-offset-4"
+                >
+                  AI receptionist is not the same as an answering service
+                </Link>
+                .
               </p>
               <div id="top-cta" className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <BookDemo className="w-full sm:w-auto" />
