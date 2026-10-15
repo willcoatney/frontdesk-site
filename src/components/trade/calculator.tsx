@@ -349,7 +349,7 @@ export function LeakCalculator({ config }: { config: CalculatorConfig }) {
         <div className="hidden lg:block">
           <div className="sticky top-24 space-y-4">
             {card}
-            <BookDemo className="w-full">Book a Demo</BookDemo>
+            <BookDemo className="w-full" />
             <p className="text-sm leading-relaxed text-[#5C564E]">
               Illustrative only. Not a promise, and not a client result. Your close rate will differ. On the demo we
               will use a real week from your phone.
@@ -360,7 +360,7 @@ export function LeakCalculator({ config }: { config: CalculatorConfig }) {
 
       <div className="mt-4 space-y-4 lg:hidden">
         {card}
-        <BookDemo className="w-full">Book a Demo</BookDemo>
+        <BookDemo className="w-full" />
         <p className="text-sm leading-relaxed text-[#5C564E]">
           Illustrative only. Not a promise, and not a client result. Your close rate will differ. On the demo we will
           use a real week from your phone.

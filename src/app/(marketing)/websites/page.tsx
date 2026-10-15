@@ -109,7 +109,7 @@ export default function WebsitesPage() {
                     </li>
                   ))}
                 </ul>
-                <BookDemo className="mt-6 w-full">Book a Demo</BookDemo>
+                <BookDemo className="mt-6 w-full" />
               </article>
             ))}
           </div>

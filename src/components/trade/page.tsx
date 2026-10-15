@@ -4,7 +4,6 @@ import { PLANS, PRICING_NOTE } from '@/content/pricing'
 import type { StepExtra, TradeConfig } from '@/content/trades/types'
 import { BeforeAfter } from './compare'
 import { LeakCalculator } from './calculator'
-import { BOOK_HREF, PHONE, PHONE_HREF } from './constants'
 import { SiteFooter } from './footer'
 import { ProductDemos } from './demos'
 import { FaqList } from './faq'
@@ -113,7 +112,7 @@ export function TradePage({ trade }: { trade: TradeConfig }) {
             <a href="#offer" className="hover:text-[#1B4332]">Pricing</a>
             <a href="#faq" className="hover:text-[#1B4332]">FAQ</a>
           </nav>
-          <BookDemo className="shrink-0 px-3.5 sm:px-5" />
+          <BookDemo header className="shrink-0" />
         </div>
       </header>
 
@@ -126,7 +125,7 @@ export function TradePage({ trade }: { trade: TradeConfig }) {
             </h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-[#3C3832] sm:text-lg">{trade.hero.lede}</p>
             <div id="top-cta" className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <BookDemo className="w-full sm:w-auto">Book a Demo</BookDemo>
+              <BookDemo className="w-full sm:w-auto" />
               <CallWill className="w-full sm:w-auto" />
             </div>
             <p className="mt-4 text-sm text-[#5C564E]">
@@ -322,7 +321,7 @@ export function TradePage({ trade }: { trade: TradeConfig }) {
                       </li>
                     ))}
                   </ul>
-                  <BookDemo className="mt-6 w-full">Book a Demo</BookDemo>
+                  <BookDemo className="mt-6 w-full" />
                 </article>
               ))}
             </div>
@@ -383,20 +382,8 @@ export function TradePage({ trade }: { trade: TradeConfig }) {
           </h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-[#D7E6DC] sm:text-lg">{trade.finalBody}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <a
-              href={BOOK_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#F6F3EC] px-5 text-base font-semibold text-[#1B4332] hover:bg-white"
-            >
-              Book a Demo
-            </a>
-            <a
-              href={PHONE_HREF}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 px-5 text-base font-semibold text-white hover:bg-white/10"
-            >
-              Call {PHONE}
-            </a>
+            <BookDemo tone="inverse" className="w-full sm:w-auto" />
+            <CallWill tone="inverse" className="w-full sm:w-auto" />
           </div>
           <p className="mt-5 text-sm text-[#D7E6DC]">
             Overland Park, Olathe, Shawnee, Lenexa, Lee’s Summit, and the rest of the Kansas City metro.

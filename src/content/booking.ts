@@ -1,2 +1,1 @@
-// TODO: replace this placeholder with the real scheduling URL when it is provided.
-export const BOOKING_URL = '#book-demo'
+export const BOOKING_URL = 'https://calendar.app.google/p9muXBgfH2vFVhUd7'
