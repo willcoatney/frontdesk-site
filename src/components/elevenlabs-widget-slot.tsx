@@ -8,6 +8,8 @@ import { isAdminPath } from '@/lib/analytics-events.mjs'
 const AGENT_ID = 'agent_9401m50cjw2kfh2b4bskwbjds260'
 const FIRST_MESSAGE =
   "Hi, this is FrontDesk AI's receptionist. Want a quick look at how we can help your business?"
+/** Tells the agent this session is the site widget, not a phone call. */
+const DYNAMIC_VARIABLES = '{"channel":"web"}'
 const WIDGET_SCRIPT = 'https://unpkg.com/@elevenlabs/convai-widget-embed'
 
 /** Space between the launcher and the top of the mobile call/book bar. */
@@ -75,6 +77,7 @@ export function ElevenLabsWidgetSlot() {
       <elevenlabs-convai
         agent-id={AGENT_ID}
         override-first-message={FIRST_MESSAGE}
+        dynamic-variables={DYNAMIC_VARIABLES}
         markdown-link-allowed-hosts="calendar.app.google"
       />
       <Script src={WIDGET_SCRIPT} strategy="afterInteractive" async type="text/javascript" />
