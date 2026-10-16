@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { display } from '@/components/display-font'
-import { ElevenLabsWidgetSlot } from '@/components/elevenlabs-widget-slot'
 import { PaperHeading } from '@/components/paper/shell'
 import { LeakCalculator } from '@/components/trade/calculator'
 import { BeforeAfter } from '@/components/trade/compare'
@@ -488,9 +487,6 @@ export default function Page() {
             </p>
           </div>
         </section>
-
-        {/* ElevenLabs chat/voice widget mounts here when the agent embed is ready. */}
-        <ElevenLabsWidgetSlot />
 
         <SiteFooter />
         <StickyCta />

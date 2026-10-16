@@ -42,7 +42,7 @@ A page that fits in the viewport does not emit `scroll_depth`. Marks are based o
 
 ## Chat widget
 
-The listener is generic. It does not know how the widget is implemented. A click whose composed path includes `#elevenlabs-widget` or an `elevenlabs-convai` element sends `chat_widget_open` once per page. A separate pull request adds the ElevenLabs embed into that mount; this hook starts working when that element is in the page.
+The listener is generic. It does not know how the widget is implemented. A click whose composed path includes `#elevenlabs-widget` or an `elevenlabs-convai` element sends `chat_widget_open` once per page. That element is the ConvAI embed in `src/components/elevenlabs-widget-slot.tsx`, mounted from the root layout on public pages.
 
 Clicks inside a cross-origin iframe do not reach the page. If the embed only opens from inside an iframe, call `trackEvent('chat_widget_open', { page_path: location.pathname })` from the embed code. `trackEvent` does nothing on `/admin`.
 

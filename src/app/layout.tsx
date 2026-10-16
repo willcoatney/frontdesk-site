@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@/components/analytics'
+import { ElevenLabsWidgetSlot } from '@/components/elevenlabs-widget-slot'
 import { HOME_DESCRIPTION, HOME_OG_ALT, HOME_TITLE } from '@/content/home'
 import './globals.css'
 
@@ -60,6 +61,7 @@ export default function RootLayout({
       <body className={`${inter.className} min-h-full`}>
         {children}
         <Analytics />
+        <ElevenLabsWidgetSlot />
       </body>
     </html>
   )
