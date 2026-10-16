@@ -10,6 +10,7 @@ declare module 'react' {
       'elevenlabs-convai': DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
         'agent-id'?: string
         'override-first-message'?: string
+        'dynamic-variables'?: string
         'markdown-link-allowed-hosts'?: string
       }
     }
